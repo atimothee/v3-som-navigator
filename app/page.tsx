@@ -44,7 +44,7 @@ export default function Page() {
             <Box mt="5" className="tagline-grid">
               <TaglineCard icon={<ChatBubbleIcon />} text="Your guide to effortless SOM coffee chats." />
               <TaglineCard icon={<RocketIcon />} text="Find the right alum, faster." />
-              <TaglineCard icon={<ArrowRightIcon />} text="Navigate the SOM network with warm intros." />
+              <TaglineCard icon={<ArrowRightIcon />} text="Navigate the SOM network with AI assistance." />
             </Box>
           </Box>
 
