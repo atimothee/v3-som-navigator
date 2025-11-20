@@ -4,7 +4,15 @@ import path from "node:path";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 
-import { somNetwork, type Profile } from "../data/network";
+export type Profile = {
+  name: string;
+  title: string;
+  gradYear: string;
+  location: string;
+  interests: string[];
+  summary: string;
+  availability: string;
+};
 
 const embeddings = new OpenAIEmbeddings({
   apiKey: process.env.OPENAI_API_KEY
@@ -13,7 +21,12 @@ const embeddings = new OpenAIEmbeddings({
 let vectorStorePromise: Promise<MemoryVectorStore> | null = null;
 
 async function buildVectorStore() {
-  const profiles: Profile[] = [...somNetwork, ...loadProfilesFromDocs()];
+  const profiles: Profile[] = loadProfilesFromDocs();
+
+  if (profiles.length === 0) {
+    // Return an empty store; the model will fall back to general guidance.
+    return MemoryVectorStore.fromTexts([], [], embeddings);
+  }
 
   const texts = profiles.map((profile) =>
     [

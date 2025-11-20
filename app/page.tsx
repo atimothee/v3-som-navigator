@@ -1,5 +1,4 @@
 import { ChatPanel } from "@/components/chat-panel";
-import { somNetwork } from "@/data/network";
 import { ArrowRightIcon, ChatBubbleIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Inset, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
@@ -84,33 +83,6 @@ export default function Page() {
           </Inset>
         </Card>
 
-        <Card className="glass">
-          <Heading size="6" mb="3">
-            A few people you can meet
-          </Heading>
-          <Grid columns={{ initial: "1", md: "3" }} gap="4">
-            {somNetwork.map((profile) => (
-              <Card key={profile.name} variant="surface">
-                <Flex justify="between" align="center" mb="1">
-                  <Text weight="bold">{profile.name}</Text>
-                  <Badge color="indigo">{profile.location}</Badge>
-                </Flex>
-                <Text size="2" color="gray">
-                  {profile.title} · {profile.gradYear}
-                </Text>
-                <Text as="p" size="2" mt="2">
-                  {profile.summary}
-                </Text>
-                <Text as="p" size="2" mt="2" color="gray">
-                  Interests: {profile.interests.join(", ")}
-                </Text>
-                <Text as="p" size="2" mt="1" color="gray">
-                  Availability: {profile.availability}
-                </Text>
-              </Card>
-            ))}
-          </Grid>
-        </Card>
       </Flex>
     </Container>
   );
