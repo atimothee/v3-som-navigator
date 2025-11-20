@@ -54,7 +54,7 @@ export default function ChatPage() {
               </Box>
 
               <Box gridColumn={{ md: "span 3" }}>
-                <ChatPanel className="chat-panel-wide" placeholder="Who can help me prep for climate finance interviews in NYC?" />
+                <ChatPanel className="chat-panel-wide" placeholder="Who can help me explore climate finance roles in NYC?" />
               </Box>
             </Grid>
           </Card>

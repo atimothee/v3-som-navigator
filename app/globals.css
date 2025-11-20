@@ -129,6 +129,22 @@ a {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.prompt-chip {
+  max-width: 260px;
+  white-space: normal;
+  text-align: left;
+  border: 1px solid var(--stroke);
+  background: linear-gradient(135deg, rgba(124, 248, 200, 0.08), rgba(111, 90, 237, 0.08));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  transition: transform 120ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.prompt-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+  border-color: rgba(124, 248, 200, 0.35);
+}
+
 .pulse {
   width: 10px;
   height: 10px;

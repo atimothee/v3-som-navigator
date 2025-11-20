@@ -69,13 +69,16 @@ export function ChatPanel({ placeholder, className }: Props) {
           style={{ marginBottom: 12 }}
         />
 
-        <Flex gap="3" align="center" justify="between">
-          <Flex gap="2">
+        <Flex gap="3" align="center" justify="between" wrap="wrap">
+          <Flex gap="2" wrap="wrap">
             {prompts.slice(0, 2).map((prompt) => (
               <Button
                 key={prompt}
                 size="1"
-                variant="ghost"
+                variant="soft"
+                color="gray"
+                radius="full"
+                className="prompt-chip"
                 onClick={(e) => {
                   e.preventDefault();
                   setInput(prompt);
