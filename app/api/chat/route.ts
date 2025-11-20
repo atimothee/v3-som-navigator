@@ -2,16 +2,10 @@ import { openai } from "@ai-sdk/openai";
 import { convertToCoreMessages, streamText } from "ai";
 import { NextRequest } from "next/server";
 import { formatProfile, retrieveProfiles } from "@/lib/rag";
-import { auth } from "@clerk/nextjs/server";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  const { userId } = auth();
-  if (!userId) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
   if (!process.env.OPENAI_API_KEY) {
     return new Response("Missing OPENAI_API_KEY", { status: 500 });
   }
