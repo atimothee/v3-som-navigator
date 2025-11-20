@@ -1,0 +1,96 @@
+:root {
+  --bg: radial-gradient(circle at 20% 20%, rgba(166, 216, 255, 0.14), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(111, 90, 237, 0.2), transparent 35%),
+    radial-gradient(circle at 60% 70%, rgba(87, 194, 173, 0.16), transparent 30%),
+    #0b0b12;
+  --panel: rgba(20, 20, 28, 0.9);
+  --stroke: rgba(255, 255, 255, 0.08);
+  --glow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  min-height: 100vh;
+  color: white;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.glass {
+  background: var(--panel);
+  border: 1px solid var(--stroke);
+  box-shadow: var(--glow);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), transparent 40%);
+  filter: blur(80px);
+  pointer-events: none;
+}
+
+.tagline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.chat-scroll {
+  max-height: 340px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.message {
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.message.user {
+  background: linear-gradient(135deg, rgba(117, 255, 196, 0.08), rgba(117, 255, 196, 0.02));
+}
+
+.message.assistant {
+  background: linear-gradient(135deg, rgba(111, 90, 237, 0.16), rgba(111, 90, 237, 0.04));
+}
+
+.pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #7cf8c8;
+  box-shadow: 0 0 0 0 rgba(124, 248, 200, 0.45);
+  animation: pulse 1.4s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(124, 248, 200, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(124, 248, 200, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(124, 248, 200, 0);
+  }
+}

@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+.DS_Store
+*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+/tmp
