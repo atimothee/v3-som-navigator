@@ -1,6 +1,5 @@
 import { ChatPanel } from "@/components/chat-panel";
-import { auth } from "@clerk/nextjs/server";
-import { redirectToSignIn } from "@clerk/nextjs";
+import { auth, redirectToSignIn } from "@clerk/nextjs/server";
 import { ArrowLeftIcon, LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
