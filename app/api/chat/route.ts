@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
   }
 
   const { messages } = (await req.json()) as { messages: unknown };
-  const coreMessages = convertToCoreMessages(messages ?? []);
+  const safeMessages = Array.isArray(messages) ? messages : [];
+  const coreMessages = convertToCoreMessages(safeMessages);
   const last = coreMessages[coreMessages.length - 1];
   const userQuestion =
     typeof last?.content === "string"
