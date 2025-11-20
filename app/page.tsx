@@ -31,11 +31,6 @@ export default function Page() {
               <Button size="3" asChild>
                 <Link href="/chat">Try the chatbot</Link>
               </Button>
-              <Button variant="ghost" size="3" asChild>
-                <Link href="https://chat-sdk.dev/" target="_blank">
-                  See the SDK <ArrowRightIcon />
-                </Link>
-              </Button>
             </Flex>
 
             <Box mt="5" className="tagline-grid">
