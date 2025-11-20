@@ -1,6 +1,7 @@
 import "@radix-ui/themes/styles.css";
 import "./globals.css";
 
+import { AnalyticsIdentify } from "@/components/analytics-identify";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Theme } from "@radix-ui/themes";
 import {
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Theme appearance="dark" accentColor="indigo" grayColor="sand">
             <Suspense fallback={null}>
               <AnalyticsProvider />
+              <AnalyticsIdentify />
             </Suspense>
             <div className="page-shell">
               <header className="site-header">

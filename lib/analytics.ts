@@ -32,3 +32,10 @@ export function trackEvent(event: string, properties?: Record<string, unknown>) 
 
   client.then(([analytics]) => analytics.track(event, properties)).catch(() => {});
 }
+
+export function identifyUser(userId: string, traits?: Record<string, unknown>) {
+  const client = getAnalytics();
+  if (!client || !userId) return;
+
+  client.then(([analytics]) => analytics.identify(userId, traits)).catch(() => {});
+}
