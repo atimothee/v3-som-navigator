@@ -74,6 +74,26 @@ a {
   background: linear-gradient(135deg, rgba(111, 90, 237, 0.16), rgba(111, 90, 237, 0.04));
 }
 
+.chat-shell {
+  transition: border-color 140ms ease, box-shadow 180ms ease, transform 200ms ease;
+}
+
+.chat-shell-expanded {
+  border-color: rgba(124, 248, 200, 0.4);
+  box-shadow: 0 0 0 1px rgba(124, 248, 200, 0.25), 0 24px 80px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+.chat-textarea {
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+
+.chat-shell-expanded .chat-textarea:focus-visible {
+  outline: none;
+  border-color: rgba(124, 248, 200, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .pulse {
   width: 10px;
   height: 10px;

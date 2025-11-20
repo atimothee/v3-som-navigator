@@ -3,7 +3,7 @@
 import { useChat, type Message } from "ai/react";
 import { Button, Card, Flex, Text, TextArea } from "@radix-ui/themes";
 import clsx from "clsx";
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 
 type Props = {
   placeholder?: string;
@@ -20,6 +20,7 @@ export function ChatPanel({ placeholder, className }: Props) {
   const { messages, input, handleInputChange, handleSubmit, isLoading, setInput } = useChat({
     api: "/api/chat"
   });
+  const [expanded, setExpanded] = useState(false);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -27,7 +28,7 @@ export function ChatPanel({ placeholder, className }: Props) {
   };
 
   return (
-    <Card className={clsx("glass", className)} size="4">
+    <Card className={clsx("glass", "chat-shell", expanded && "chat-shell-expanded", className)} size="4">
       <Flex justify="between" align="center" mb="4">
         <div>
           <Text weight="bold">Try the navigator</Text>
@@ -55,7 +56,15 @@ export function ChatPanel({ placeholder, className }: Props) {
           placeholder={placeholder ?? prompts[Math.floor(Math.random() * prompts.length)]}
           value={input}
           onChange={handleInputChange}
-          rows={3}
+          rows={expanded ? 5 : 2}
+          className="chat-textarea"
+          onFocus={() => setExpanded(true)}
+          onBlur={() => {
+            // Collapse only when the field is empty to mirror chat-sdk UX.
+            if (!input.trim()) {
+              setExpanded(false);
+            }
+          }}
           style={{ marginBottom: 12 }}
         />
 
@@ -69,6 +78,7 @@ export function ChatPanel({ placeholder, className }: Props) {
                 onClick={(e) => {
                   e.preventDefault();
                   setInput(prompt);
+                  setExpanded(true);
                 }}
               >
                 {prompt}
