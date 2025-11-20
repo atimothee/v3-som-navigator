@@ -5,12 +5,12 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 const stats = [
-  { label: "Alums indexed", value: "6 curated starts", detail: "Expands with your data." },
+  { label: "Alums indexed", value: "Thousands indexed", detail: "Expands with your data." },
   { label: "Coffee chats booked", value: "Fast recommendations", detail: "Outreach copy included." },
   {
-    label: "Search styles",
-    value: "Natural language first",
-    detail: "Ask in your own words: goals, vibe, or a draft opener—and we handle intent."
+    label: "Plain language",
+    value: "No filters needed",
+    detail: "Type your goal, vibe, or draft opener. We pick up the intent."
   }
 ];
 
