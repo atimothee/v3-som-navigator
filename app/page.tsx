@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 
 const stats = [
-  { label: "Alums indexed", value: "Thousands indexed", detail: "Expands with your data." },
+  { label: "Alums indexed", value: "Alums at your fingertips", detail: "Thousands indexed; expands with your data." },
   { label: "Coffee chats booked", value: "Fast recommendations", detail: "Outreach copy included." },
   {
     label: "Plain language",
