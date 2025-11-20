@@ -30,7 +30,7 @@ export default function Page() {
 
             <Flex gap="3" mt="4" wrap="wrap">
               <Button size="3" asChild>
-                <Link href="#try">Try the chatbot</Link>
+                <Link href="/chat">Try the chatbot</Link>
               </Button>
               <Button variant="ghost" size="3" asChild>
                 <Link href="https://chat-sdk.dev/" target="_blank">
