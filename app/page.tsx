@@ -28,11 +28,10 @@ export default function Page() {
               SOM Network Navigator
             </Badge>
             <Heading size="9" mt="3" mb="3">
-              Navigate the SOM network, one coffee chat at a time.
+              Navigate the SOM network, with AI assistance.
             </Heading>
             <Text size="4" color="gray">
-              Your guide to effortless SOM coffee chats. Find the right alum, faster. Try a prompt right on this page,
-              then dive deeper.
+              Your guide to effortless SOM coffee chats. Find the right alum, faster. Try a prompt, then dive deeper.
             </Text>
 
             <Flex gap="3" mt="4" wrap="wrap">
