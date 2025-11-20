@@ -1,5 +1,4 @@
 import { ChatPanel } from "@/components/chat-panel";
-import { auth } from "@clerk/nextjs/server";
 import { ArrowLeftIcon, LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
@@ -11,9 +10,6 @@ const perks = [
 ];
 
 export default function ChatPage() {
-  const { userId } = auth();
-  if (!userId) return null; // Middleware should already redirect
-
   return (
     <div className="chat-page">
       <Container size="3" px="5" py="6">
