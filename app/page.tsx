@@ -1,8 +1,6 @@
 import { ChatPanel } from "@/components/chat-panel";
-import { ArrowRightIcon, ChatBubbleIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Inset, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
-import { ReactNode } from "react";
 
 const stats = [
   { label: "Alums indexed", value: "Alums at your fingertips", detail: "Thousands indexed; expands with your data." },
@@ -39,12 +37,6 @@ export default function Page() {
                 <Link href="/chat">Try the chatbot</Link>
               </Button>
             </Flex>
-
-            <Box mt="5" className="tagline-grid">
-              <TaglineCard icon={<ChatBubbleIcon />} text="Your guide to effortless SOM coffee chats." />
-              <TaglineCard icon={<RocketIcon />} text="Find the right alum, faster." />
-              <TaglineCard icon={<ArrowRightIcon />} text="Navigate the SOM network with AI assistance." />
-            </Box>
           </Box>
 
           <Box id="try" width="100%" style={{ flex: 1 }}>
@@ -87,17 +79,6 @@ export default function Page() {
 
       </Flex>
     </Container>
-  );
-}
-
-function TaglineCard({ icon, text }: { icon: ReactNode; text: string }) {
-  return (
-    <Card variant="surface" className="glass">
-      <Flex align="center" gap="2">
-        {icon}
-        <Text size="2">{text}</Text>
-      </Flex>
-    </Card>
   );
 }
 
