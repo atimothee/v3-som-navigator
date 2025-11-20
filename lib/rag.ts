@@ -1,5 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
+
 import { somNetwork, type Profile } from "../data/network";
 
 const embeddings = new OpenAIEmbeddings({
@@ -9,7 +13,9 @@ const embeddings = new OpenAIEmbeddings({
 let vectorStorePromise: Promise<MemoryVectorStore> | null = null;
 
 async function buildVectorStore() {
-  const texts = somNetwork.map((profile) =>
+  const profiles: Profile[] = [...somNetwork, ...loadProfilesFromDocs()];
+
+  const texts = profiles.map((profile) =>
     [
       `${profile.name} | ${profile.title} | ${profile.gradYear} | ${profile.location}`,
       `Interests: ${profile.interests.join(", ")}`,
@@ -18,7 +24,7 @@ async function buildVectorStore() {
     ].join("\n")
   );
 
-  return MemoryVectorStore.fromTexts(texts, somNetwork, embeddings);
+  return MemoryVectorStore.fromTexts(texts, profiles, embeddings);
 }
 
 export async function getStore() {
@@ -48,4 +54,56 @@ export function formatProfile(profile: Profile) {
     `Availability: ${profile.availability}`,
     `Notes: ${profile.summary}`
   ].join("\n");
+}
+
+function loadProfilesFromDocs(): Profile[] {
+  const docsDir = path.join(process.cwd(), "data", "docs");
+  if (!fs.existsSync(docsDir)) return [];
+
+  const files = fs.readdirSync(docsDir).filter((file) => file.endsWith(".json"));
+  const loaded: Profile[] = [];
+
+  for (const file of files) {
+    const fullPath = path.join(docsDir, file);
+    try {
+      const raw = JSON.parse(fs.readFileSync(fullPath, "utf8"));
+      const candidates = Array.isArray(raw) ? raw : [raw];
+      for (const candidate of candidates) {
+        const profile = normalizeProfile(candidate);
+        if (profile) loaded.push(profile);
+      }
+    } catch (err) {
+      console.warn(`Failed to read ${fullPath}:`, err);
+    }
+  }
+
+  return loaded;
+}
+
+function normalizeProfile(input: any): Profile | null {
+  if (!input || typeof input !== "object") return null;
+
+  const name = input.name ?? input.fullName;
+  const title = input.title ?? input.role ?? "";
+  const gradYear = input.gradYear ?? input.classYear ?? "SOM";
+  const location = input.location ?? input.city ?? "Unknown";
+  const interests = Array.isArray(input.interests)
+    ? input.interests.map((v: any) => String(v))
+    : typeof input.interests === "string"
+      ? input.interests.split(",").map((v: string) => v.trim())
+      : [];
+  const summary = input.summary ?? input.bio ?? "";
+  const availability = input.availability ?? input.slots ?? "Availability not provided";
+
+  if (!name || !title || !summary) return null;
+
+  return {
+    name: String(name),
+    title: String(title),
+    gradYear: String(gradYear),
+    location: String(location),
+    interests,
+    summary: String(summary),
+    availability: String(availability)
+  };
 }

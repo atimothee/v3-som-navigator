@@ -3,8 +3,7 @@ import { convertToCoreMessages, streamText } from "ai";
 import { NextRequest } from "next/server";
 import { formatProfile, retrieveProfiles } from "@/lib/rag";
 
-export const runtime = "edge";
-export const maxDuration = 15;
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
