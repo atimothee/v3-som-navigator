@@ -21,7 +21,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={font.className}>
       <body>
         <Theme appearance="dark" accentColor="indigo" grayColor="sand">
-          {children}
+          <div className="page-shell">
+            <div className="page-content">{children}</div>
+            <footer className="site-footer">
+              <span>Built by Timo, Parm &amp; Aniket</span>
+            </footer>
+          </div>
         </Theme>
       </body>
     </html>
