@@ -51,8 +51,9 @@ export async function getStore() {
 export async function retrieveProfiles(query: string, k = 4) {
   const store = await getStore();
   const matches = await store.similaritySearch(query, k);
+  const safeMatches = matches as Array<typeof matches[number] & { score?: number }>;
 
-  return matches.map((match) => ({
+  return safeMatches.map((match) => ({
     profile: match.metadata as Profile,
     score: match.score ?? 0,
     snippet: match.pageContent
