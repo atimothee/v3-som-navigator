@@ -23,7 +23,7 @@ export default function Page() {
     <Container size="3" px="5" py="6">
       <Flex direction="column" gap="6" className="hero">
         <Flex direction={{ initial: "column", md: "row" }} gap="6" align="center">
-          <Box flex="1">
+          <Box style={{ flex: 1 }}>
             <Badge color="green" variant="soft" radius="full">
               SOM Network Navigator
             </Badge>
@@ -48,7 +48,7 @@ export default function Page() {
             </Box>
           </Box>
 
-          <Box flex="1" id="try" width="100%">
+          <Box id="try" width="100%" style={{ flex: 1 }}>
             <ChatPanel />
           </Box>
         </Flex>
