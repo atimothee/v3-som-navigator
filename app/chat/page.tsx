@@ -1,5 +1,5 @@
 import { ChatPanel } from "@/components/chat-panel";
-import { auth, redirectToSignIn } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { ArrowLeftIcon, LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
@@ -12,9 +12,7 @@ const perks = [
 
 export default function ChatPage() {
   const { userId } = auth();
-  if (!userId) {
-    return redirectToSignIn({ returnBackUrl: "/chat" });
-  }
+  if (!userId) return null; // Middleware should already redirect
 
   return (
     <div className="chat-page">
