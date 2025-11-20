@@ -12,6 +12,7 @@ import {
 } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
+import Link from "next/link";
 import { ReactNode } from "react";
 
 const font = Space_Grotesk({
@@ -42,7 +43,35 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </header>
               <div className="page-content">{children}</div>
               <footer className="site-footer">
-                <span>Built by Timo, Parm &amp; Aniket</span>
+                <span>
+                  Built by{" "}
+                  <Link
+                    href="https://www.linkedin.com/in/timothyasiimwe/"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    Timo
+                  </Link>
+                  ,{" "}
+                  <Link
+                    href="https://www.linkedin.com/in/psgca/"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    Parm
+                  </Link>{" "}
+                  &amp;{" "}
+                  <Link
+                    href="https://www.linkedin.com/in/aniket-agg/"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ textDecoration: "underline" }}
+                  >
+                    Aniket
+                  </Link>
+                </span>
               </footer>
             </div>
           </Theme>
