@@ -6,7 +6,11 @@ import { ReactNode } from "react";
 
 const stats = [
   { label: "Alums indexed", value: "Alums at your fingertips", detail: "Thousands indexed; expands with your data." },
-  { label: "Coffee chats booked", value: "Fast recommendations", detail: "Outreach copy included." },
+  {
+    label: "Coffee chats",
+    value: "Outreach-ready matches",
+    detail: "Get matches plus copy you can send immediately to speed booking."
+  },
   {
     label: "Plain language",
     value: "No filters needed",
