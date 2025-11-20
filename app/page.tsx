@@ -8,8 +8,8 @@ const stats = [
   { label: "Alums indexed", value: "Alums at your fingertips", detail: "Thousands indexed; expands with your data." },
   {
     label: "Coffee chats",
-    value: "Outreach-ready matches",
-    detail: "Get matches plus copy you can send immediately to speed booking."
+    value: "Outreach-ready copy",
+    detail: "Get a match and a paste-ready note so you can book faster."
   },
   {
     label: "Plain language",
