@@ -10,7 +10,7 @@ const stats = [
   {
     label: "Search styles",
     value: "Natural language first",
-    detail: "Ask in your own words—goals, vibe, or a draft opener—and we handle intent."
+    detail: "Ask in your own words: goals, vibe, or a draft opener—and we handle intent."
   }
 ];
 
