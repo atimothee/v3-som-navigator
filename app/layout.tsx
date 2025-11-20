@@ -14,7 +14,7 @@ import {
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import Link from "next/link";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 
 const font = Space_Grotesk({
   subsets: ["latin"],
@@ -32,7 +32,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <html lang="en" className={font.className}>
         <body>
           <Theme appearance="dark" accentColor="indigo" grayColor="sand">
-            <AnalyticsProvider />
+            <Suspense fallback={null}>
+              <AnalyticsProvider />
+            </Suspense>
             <div className="page-shell">
               <header className="site-header">
                 <SignedOut>
