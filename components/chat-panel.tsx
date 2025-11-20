@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import { useChat, type Message } from "ai/react";
 import { Button, Card, Flex, Text, TextArea } from "@radix-ui/themes";
 import clsx from "clsx";
@@ -25,6 +26,13 @@ export function ChatPanel({ placeholder, className }: Props) {
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const prompt = input.trim();
+    if (prompt) {
+      trackEvent("Chat Query Submitted", {
+        prompt,
+        messageCount: messages.length + 1
+      });
+    }
     handleSubmit(event);
   };
 
@@ -83,6 +91,7 @@ export function ChatPanel({ placeholder, className }: Props) {
                   e.preventDefault();
                   setInput(prompt);
                   setExpanded(true);
+                  trackEvent("Prompt Prefilled", { prompt });
                 }}
               >
                 {prompt}

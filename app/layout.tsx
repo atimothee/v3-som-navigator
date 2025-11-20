@@ -1,6 +1,7 @@
 import "@radix-ui/themes/styles.css";
 import "./globals.css";
 
+import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Theme } from "@radix-ui/themes";
 import {
   ClerkProvider,
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <html lang="en" className={font.className}>
         <body>
           <Theme appearance="dark" accentColor="indigo" grayColor="sand">
+            <AnalyticsProvider />
             <div className="page-shell">
               <header className="site-header">
                 <SignedOut>
