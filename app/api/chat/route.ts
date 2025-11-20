@@ -40,7 +40,8 @@ export async function POST(req: NextRequest) {
     `Alum context:\n${context}`;
 
   const result = await streamText({
-    model: openai("gpt-4o-mini"),
+    // Cast to bypass mismatched @ai-sdk/provider versions between transitive deps.
+    model: openai("gpt-4o-mini") as any,
     temperature: 0.4,
     system,
     messages: coreMessages
