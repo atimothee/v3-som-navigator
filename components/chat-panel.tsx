@@ -4,6 +4,7 @@ import { useChat, type Message } from "ai/react";
 import { Button, Card, Flex, Text, TextArea } from "@radix-ui/themes";
 import clsx from "clsx";
 import { FormEvent, useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 type Props = {
   placeholder?: string;
@@ -106,9 +107,24 @@ function MessageBubble({ message }: { message: Message }) {
       <Text weight="bold" size="2" color="gray">
         {isUser ? "You" : "Navigator"}
       </Text>
-      <Text as="p" size="2" style={{ whiteSpace: "pre-wrap", marginTop: 6 }}>
-        {message.content}
-      </Text>
+      <div className="message-content">
+        <MarkdownContent content={message.content} />
+      </div>
     </Card>
   );
+}
+
+function MarkdownContent({ content }: { content: Message["content"] }) {
+  if (typeof content === "string") {
+    return <ReactMarkdown>{content}</ReactMarkdown>;
+  }
+
+  if (Array.isArray(content)) {
+    const text = content
+      .map((chunk) => ("text" in chunk && typeof chunk.text === "string" ? chunk.text : ""))
+      .join(" ");
+    return <ReactMarkdown>{text}</ReactMarkdown>;
+  }
+
+  return <Text size="2">{String(content)}</Text>;
 }

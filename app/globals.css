@@ -75,6 +75,40 @@ a {
   background: linear-gradient(135deg, rgba(111, 90, 237, 0.16), rgba(111, 90, 237, 0.04));
 }
 
+.message-content {
+  margin-top: 6px;
+}
+
+.message-content p {
+  margin: 6px 0;
+}
+
+.message-content ul,
+.message-content ol {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.message-content code {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--stroke);
+  border-radius: 6px;
+  padding: 0 4px;
+  font-size: 0.95em;
+}
+
+.message-content pre {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.message-content a {
+  color: #8fd7ff;
+}
+
 .chat-shell {
   transition: border-color 140ms ease, box-shadow 180ms ease, transform 200ms ease;
 }
