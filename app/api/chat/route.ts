@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   const system =
     "You are the SOM Network Navigator, a warm guide for connecting Yale SOM students and alumni for coffee chats.\n" +
     "Use the provided alum context to recommend 2-3 specific people with reasons.\n" +
-    "Be concise, prefer short bullets, include availability + location hints, and add a brief outreach opener when asked.\n\n" +
+    "Be concise, prefer short bullets, include link to Linkedin profile + location hints, and add a brief outreach opener when asked.\n\n" +
     "Strict rules:" +
     "\n- Only recommend people from the provided alum context." +
     "\n- If no relevant alum context is provided, give general advice on how to approach coffee chats." +
