@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
         : "";
 
   const matches = await retrieveProfiles(userQuestion);
+  console.log("Retrieved profiles:", matches);
   const context = matches.map(({ profile }) => formatProfile(profile)).join("\n\n") ||
     "No specific context matched; offer general networking guidance for SOM coffee chats.";
 
@@ -30,6 +31,11 @@ export async function POST(req: NextRequest) {
     "You are the SOM Network Navigator, a warm guide for connecting Yale SOM students and alumni for coffee chats.\n" +
     "Use the provided alum context to recommend 2-3 specific people with reasons.\n" +
     "Be concise, prefer short bullets, include availability + location hints, and add a brief outreach opener when asked.\n\n" +
+    "Strict rules:" +
+    "\n- Only recommend people from the provided alum context." +
+    "\n- If no relevant alum context is provided, give general advice on how to approach coffee chats." +
+    "\n- Always maintain a friendly and encouraging tone." +
+    "\n - Do not fabricate information about alumni.\n" +
     `Alum context:\n${context}`;
 
   const result = await streamText({

@@ -26,7 +26,7 @@ export default function ChatPage() {
               </Badge>
             </Flex>
             <Text size="2" color="gray">
-              Dedicated chat workspace · Radix UI + shadcn-inspired shell
+              Free for a limited time only
             </Text>
           </Flex>
 

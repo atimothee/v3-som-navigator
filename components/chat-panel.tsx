@@ -44,7 +44,7 @@ export function ChatPanel({ placeholder, className }: Props) {
         {messages.length === 0 ? (
           <Card variant="surface" className="message assistant" mb="3">
             <Text size="2" color="gray">
-              Ready to map your next SOM coffee chat. Ask anything—roles, regions, or how to phrase the outreach.
+              Ready to map your next SOM coffee chat. Ask anything: roles, regions, or how to phrase the outreach.
             </Text>
           </Card>
         ) : (
