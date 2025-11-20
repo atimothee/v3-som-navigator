@@ -26,7 +26,7 @@ export default function ChatPage() {
               </Badge>
             </Flex>
             <Text size="2" color="gray">
-              Free for a limited time only
+              Free for a limited time only.
             </Text>
           </Flex>
 
