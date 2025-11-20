@@ -1,7 +1,9 @@
 import { ChatPanel } from "@/components/chat-panel";
+import { auth } from "@clerk/nextjs/server";
 import { ArrowLeftIcon, LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 const perks = [
   { icon: <LightningBoltIcon />, title: "Fast matches", body: "RAG-powered picks across roles, regions, and vibes." },
@@ -10,6 +12,11 @@ const perks = [
 ];
 
 export default function ChatPage() {
+  const { userId } = auth();
+  if (!userId) {
+    redirect("/sign-in?redirect_url=/chat");
+  }
+
   return (
     <div className="chat-page">
       <Container size="3" px="5" py="6">
