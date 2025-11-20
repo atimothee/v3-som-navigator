@@ -123,8 +123,9 @@ function MarkdownContent({ content }: { content: Message["content"] }) {
   }
 
   if (Array.isArray(content)) {
-    const text = content
-      .map((chunk: any) => ("text" in chunk && typeof chunk.text === "string" ? chunk.text : ""))
+    const chunks = content as Array<{ text?: unknown }>;
+    const text = chunks
+      .map((chunk) => (typeof chunk.text === "string" ? chunk.text : ""))
       .join(" ");
     return <ReactMarkdown>{text}</ReactMarkdown>;
   }
