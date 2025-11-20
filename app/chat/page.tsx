@@ -25,8 +25,10 @@ export default function ChatPage() {
                 SOM Network Navigator
               </Badge>
             </Flex>
-            <Text size="2" color="gray">
-              Free for a limited time only.
+            <Text asChild size="2" color="gray">
+              <Link href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer">
+                Give us feedback
+              </Link>
             </Text>
           </Flex>
 
