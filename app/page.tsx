@@ -3,7 +3,7 @@ import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Inset, Separa
 import Link from "next/link";
 
 const stats = [
-  { label: "Alums indexed", value: "Alums at your fingertips", detail: "Thousands indexed; expands with your data." },
+  { label: "1000+ alums indexed", value: "Alums at your fingertips", detail: "Thousands indexed; expands with your data." },
   {
     label: "Coffee chats",
     value: "Outreach-ready copy",
