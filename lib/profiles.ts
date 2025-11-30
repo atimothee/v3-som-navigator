@@ -13,27 +13,23 @@ export type Profile = {
 };
 
 export function loadProfilesFromDocs(): Profile[] {
-  const docsDir = path.join(process.cwd(), "data", "docs");
-  if (!fs.existsSync(docsDir)) return [];
-
-  const files = fs.readdirSync(docsDir).filter((file) => file.endsWith(".json"));
-  const loaded: Profile[] = [];
-
-  for (const file of files) {
-    const fullPath = path.join(docsDir, file);
-    try {
-      const raw = JSON.parse(fs.readFileSync(fullPath, "utf8"));
-      const candidates = Array.isArray(raw) ? raw : [raw];
-      for (const candidate of candidates) {
-        const profile = normalizeProfile(candidate);
-        if (profile) loaded.push(profile);
-      }
-    } catch (err) {
-      console.warn(`Failed to read ${fullPath}:`, err);
-    }
+  const combinedPath = path.join(process.cwd(), "data", "docs", "combined_profiles.json");
+  if (!fs.existsSync(combinedPath)) {
+    console.warn(`combined_profiles.json not found at ${combinedPath}`);
+    return [];
   }
 
-  return loaded;
+  try {
+    const raw = JSON.parse(fs.readFileSync(combinedPath, "utf8"));
+    const candidates = Array.isArray(raw) ? raw : [raw];
+
+    return candidates
+      .map((candidate) => normalizeProfile(candidate))
+      .filter((profile): profile is Profile => Boolean(profile));
+  } catch (err) {
+    console.warn(`Failed to read ${combinedPath}:`, err);
+    return [];
+  }
 }
 
 export function profileToText(profile: Profile) {

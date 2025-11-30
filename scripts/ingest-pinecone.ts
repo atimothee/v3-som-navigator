@@ -1,9 +1,19 @@
-import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+
+import dotenv from "dotenv";
 
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 
 import { loadProfilesFromDocs, profileToText, type Profile } from "../lib/profiles";
+
+const envFiles = [".env", ".env.local"].map((file) => path.join(process.cwd(), file));
+for (const envPath of envFiles) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath, override: true });
+  }
+}
 
 const EMBEDDING_MODEL = "text-embedding-3-large";
 const EMBEDDING_DIMENSION = 3072;
@@ -28,14 +38,17 @@ async function main() {
   const index = pinecone.index(indexName);
   await validateIndex(index, embeddingClient);
 
+  const dryRun = process.argv.includes("--dry-run");
   const profiles = loadProfilesFromDocs();
   if (!profiles.length) {
-    console.log("No profiles found in data/docs; nothing to ingest.");
+    console.log("No profiles found in combined_profiles.json; nothing to ingest.");
     return;
   }
 
   const ids = buildStableIds(profiles);
-  console.log(`Upserting ${profiles.length} profiles to Pinecone index "${indexName}"...`);
+  console.log(
+    `${dryRun ? "Simulating upsert of" : "Upserting"} ${profiles.length} profiles from data/docs/combined_profiles.json to Pinecone index "${indexName}"...`
+  );
 
   for (let start = 0; start < profiles.length; start += BATCH_SIZE) {
     const batchProfiles = profiles.slice(start, start + BATCH_SIZE);
@@ -49,14 +62,25 @@ async function main() {
       metadata: batchProfiles[idx]
     }));
 
+    if (dryRun) {
+      console.log(
+        `[DRY RUN] Batch ${start + 1}-${start + payload.length}: first payload\n${JSON.stringify(payload[0], null, 2)}`
+      );
+      continue;
+    }
+
     await index.upsert(payload);
     console.log(`Upserted ${start + payload.length}/${profiles.length}`);
   }
 
-  console.log("Ingest complete.");
+  console.log(dryRun ? "Dry run complete." : "Ingest complete.");
 
-  const sampleQuery = process.argv.slice(2).join(" ") || "school of management alumni interested in fintech";
-  await runSampleQuery(embeddingClient, index, sampleQuery);
+  if (!dryRun) {
+    const sampleQuery =
+      process.argv.slice(2).filter((arg) => arg !== "--dry-run").join(" ") ||
+      "school of management alumni interested in fintech";
+    await runSampleQuery(embeddingClient, index, sampleQuery);
+  }
 }
 
 async function validateIndex(
@@ -128,7 +152,9 @@ function buildStableIds(profiles: Profile[]) {
   const counts = new Map<string, number>();
 
   return profiles.map((profile, index) => {
-    const base = slugify(`${profile.name}-${profile.gradYear}`);
+    const preferred = profile.linkedinUrl ? slugify(profile.linkedinUrl) : "";
+    const fallback = slugify(`${profile.name}-${profile.gradYear}`);
+    const base = preferred || fallback || `profile-${index}`;
     const count = counts.get(base) ?? 0;
     counts.set(base, count + 1);
 
