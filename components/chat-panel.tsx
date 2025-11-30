@@ -171,7 +171,10 @@ export function ChatPanel({ placeholder, className }: Props) {
           </Flex>
         </Flex>
 
-        <Text size="1" color="gray" mt="2">
+        <Text as="p" size="1" color="gray" mt="2">
+          Tip: Add details and context. Navigator won't remember your last question.
+        </Text>
+        <Text as="p" size="1" color="gray" mt="2">
           Found issue?{" "}
           <a href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
             Give us feedback
