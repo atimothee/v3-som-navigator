@@ -16,16 +16,16 @@ export default function ChatPage() {
         <Flex direction="column" gap="6">
           <Flex direction="column" align="center" gap="3" className="chat-top">
             <Badge variant="surface" color="indigo">
-              Live assistant
+              Beta Version
             </Badge>
             <Heading size="8" align="center" className="chat-title">
-              Talk to the Navigator
+              Talk to the SOM Navigator
             </Heading>
             <Text size="4" color="gray" align="center" style={{ maxWidth: "780px" }}>
-              A focused chat surface for alum matches, outreach scripts, and quick guidance on your next coffee chat.
+              Find the right alum to contact, copy an opener, and prep your coffee chat in minutes.
             </Text>
             <Text size="2" color="gray" align="center">
-              Currently in beta. Share feedback <Link href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer">here</Link>.
+              Share feedback <Link href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer">here</Link>.
             </Text>
           </Flex>
 
