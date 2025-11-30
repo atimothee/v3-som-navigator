@@ -59,6 +59,7 @@ export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalR
       vector,
       includeMetadata: true
     });
+    console.log("Pinecone ids:", results.matches?.map((match) => match.id));
 
     if (results.matches?.length) {
       pineconeMatches = results.matches.map((match) => {
