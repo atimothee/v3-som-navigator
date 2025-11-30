@@ -52,13 +52,6 @@ export default function ChatPage() {
               ))}
             </Grid>
           </Box>
-
-          <Flex justify="center">
-            <Text size="2" color="gray">
-              Prefer browsing?{" "}
-              <Link href="/">Go to home</Link>
-            </Text>
-          </Flex>
         </Flex>
       </Container>
     </div>
