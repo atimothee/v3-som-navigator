@@ -14,14 +14,6 @@ export default function ChatPage() {
     <div className="chat-page">
       <Container size="4" px="6" py="7">
         <Flex direction="column" gap="6">
-          <Flex justify="end" align="center">
-            <Text asChild size="2" color="gray">
-              <Link href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer">
-                Share feedback
-              </Link>
-            </Text>
-          </Flex>
-
           <Flex direction="column" align="center" gap="3" className="chat-top">
             <Badge variant="surface" color="indigo">
               Live assistant
@@ -33,7 +25,7 @@ export default function ChatPage() {
               A focused chat surface for alum matches, outreach scripts, and quick guidance on your next coffee chat.
             </Text>
             <Text size="2" color="gray" align="center">
-              Private to this session. We only use your prompts to improve your answers here.
+              Currently in beta. Share feedback <Link href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer">here</Link>.
             </Text>
           </Flex>
 
