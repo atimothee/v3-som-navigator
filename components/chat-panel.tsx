@@ -6,6 +6,7 @@ import { Button, Card, Flex, Text, TextArea } from "@radix-ui/themes";
 import clsx from "clsx";
 import { FormEvent, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 
 type Props = {
   placeholder?: string;
@@ -104,7 +105,16 @@ export function ChatPanel({ placeholder, className }: Props) {
         </Flex>
 
         <Text size="1" color="gray" mt="2">
-          Tip: ask for 2–3 alum matches plus a ready-to-send opener.
+          Found issue? Give us{" "}
+          <Link
+            href="https://forms.gle/pjzU8X8eKQ4YMRrq9"
+            target="_blank"
+            rel="noreferrer"
+            style={{ textDecoration: "underline" }}
+          >
+            feedback
+          </Link>
+          .
         </Text>
       </form>
     </Card>
