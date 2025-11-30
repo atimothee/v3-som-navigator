@@ -102,6 +102,10 @@ export function ChatPanel({ placeholder, className }: Props) {
             Send
           </Button>
         </Flex>
+
+        <Text size="1" color="gray" mt="2">
+          Tip: ask for 2–3 alum matches plus a ready-to-send opener.
+        </Text>
       </form>
     </Card>
   );

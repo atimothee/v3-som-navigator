@@ -79,8 +79,17 @@ a {
   gap: 12px;
 }
 
+.chat-shell {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 22px 68px rgba(0, 0, 0, 0.4);
+}
+
 .chat-scroll {
-  max-height: 340px;
+  flex: 1 1 auto;
+  max-height: min(70vh, 620px);
+  min-height: 280px;
   overflow-y: auto;
   padding-right: 6px;
 }
@@ -180,9 +189,16 @@ a {
 
 .chat-page {
   min-height: 100vh;
-  background: radial-gradient(circle at 0% 20%, rgba(111, 90, 237, 0.18), transparent 40%),
-    radial-gradient(circle at 90% 10%, rgba(87, 194, 173, 0.18), transparent 30%),
+  background: radial-gradient(circle at 55% 20%, rgba(111, 90, 237, 0.16), transparent 38%),
+    radial-gradient(circle at 25% 70%, rgba(87, 194, 173, 0.12), transparent 32%),
     var(--bg);
+  padding-bottom: 32px;
+}
+
+.chat-panel-wrap {
+  width: 100%;
+  max-width: 920px;
+  margin: 0 auto;
 }
 
 .chat-panel-wide {
@@ -205,6 +221,40 @@ a {
 
 .chat-hero-copy {
   position: relative;
+}
+
+.chat-spotlight {
+  position: relative;
+  padding: 10px;
+  border-radius: 24px;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 40%);
+}
+
+.chat-top {
+  text-align: center;
+}
+
+.perk-chip {
+  padding: 8px 12px;
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18);
+}
+
+.perk-card-row {
+  border-style: dashed;
+}
+
+.context-strip {
+  border: 1px dashed var(--stroke);
+  border-radius: 16px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.context-icon {
+  display: inline-flex;
 }
 
 @keyframes pulse {
