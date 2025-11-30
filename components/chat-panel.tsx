@@ -14,7 +14,7 @@ type Props = {
 
 const prompts = [
   "Who can help me with a climate finance internship in NYC?",
-  "I'm exploring mobility partnerships in London—who should I meet?",
+  "I'm exploring product management in New York City—who should I meet?",
   "Looking for alum advice on launching a B2B SaaS pilot."
 ];
 
