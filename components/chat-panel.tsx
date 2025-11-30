@@ -172,7 +172,11 @@ export function ChatPanel({ placeholder, className }: Props) {
         </Flex>
 
         <Text size="1" color="gray" mt="2">
-          Tip: ask for 2–3 alum matches plus a ready-to-send opener.
+          Found issue?{" "}
+          <a href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
+            Give us feedback
+          </a>
+          .
         </Text>
       </form>
 
