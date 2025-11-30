@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "ingest:pinecone": "tsx scripts/ingest-pinecone.ts"
+    "ingest:pinecone": "tsx scripts/ingest-pinecone.ts",
+    "delete:pinecone": "tsx scripts/delete-pinecone-profiles.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.13",
