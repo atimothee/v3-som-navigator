@@ -1,8 +1,6 @@
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { MemoryVectorStore } from "langchain/vectorstores/memory";
-
-import { Profile, loadProfilesFromDocs, profileToText } from "./profiles";
+import { Profile, profileToText } from "./profiles";
 
 const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
@@ -15,48 +13,24 @@ const embeddings = new OpenAIEmbeddings({
   dimensions: EMBEDDING_DIMENSION
 });
 
-let vectorStorePromise: Promise<MemoryVectorStore> | null = null;
 let pineconeClient: Pinecone | null = null;
 let pineconeIndex: ReturnType<Pinecone["index"]> | null = null;
 let pineconeIndexValidated = false;
-
-async function buildVectorStore() {
-  const profiles: Profile[] = loadProfilesFromDocs();
-
-  if (profiles.length === 0) {
-    // Return an empty store; the model will fall back to general guidance.
-    return MemoryVectorStore.fromTexts([], [], embeddings);
-  }
-
-  const texts = profiles.map((profile) => profileToText(profile));
-
-  return MemoryVectorStore.fromTexts(texts, profiles, embeddings);
-}
-
-export async function getStore() {
-  if (!vectorStorePromise) {
-    vectorStorePromise = buildVectorStore();
-  }
-
-  return vectorStorePromise;
-}
 
 export async function retrieveProfiles(query: string, k = 4) {
   const index = getPineconeIndex();
 
   if (!index) {
-    console.warn("Pinecone not configured; using in-memory search.");
-    return retrieveFromMemory(query, k);
+    throw new Error("Pinecone not configured; set PINECONE_API_KEY and PINECONE_INDEX.");
   }
 
   const ready = await ensurePineconeIndex(index);
   if (!ready) {
-    console.warn("Pinecone index not ready; using in-memory search.");
-    return retrieveFromMemory(query, k);
+    throw new Error("Pinecone index not ready or dimension mismatch.");
   }
 
+  const vector = await embedText(query);
   try {
-    const vector = await embedText(query);
     const results = await index.query({
       topK: k,
       vector,
@@ -74,22 +48,11 @@ export async function retrieveProfiles(query: string, k = 4) {
       });
     }
   } catch (err) {
-    console.warn("Pinecone query failed; falling back to in-memory store.", err);
+    console.error("Pinecone query failed.", err);
+    throw new Error("Pinecone query failed.");
   }
 
-  return retrieveFromMemory(query, k);
-}
-
-async function retrieveFromMemory(query: string, k: number) {
-  const store = await getStore();
-  const matches = await store.similaritySearch(query, k);
-  const safeMatches = matches as Array<typeof matches[number] & { score?: number }>;
-
-  return safeMatches.map((match) => ({
-    profile: match.metadata as Profile,
-    score: match.score ?? 0,
-    snippet: match.pageContent
-  }));
+  return [];
 }
 
 export function formatProfile(profile: Profile) {
