@@ -4,7 +4,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useChat, type Message } from "ai/react";
 import { Button, Card, Flex, Text, TextArea } from "@radix-ui/themes";
 import clsx from "clsx";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 
@@ -24,52 +24,6 @@ export function ChatPanel({ placeholder, className }: Props) {
     api: "/api/chat"
   });
   const [expanded, setExpanded] = useState(false);
-  const [isNearBottom, setIsNearBottom] = useState(true);
-  const [showNewReply, setShowNewReply] = useState(false);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const prevMessageCountRef = useRef(0);
-
-  const scrollToBottom = () => {
-    const node = scrollRef.current;
-    if (!node) return;
-    node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    const node = scrollRef.current;
-    if (!node) return;
-
-    const handleScroll = () => {
-      const threshold = 150;
-      const nearBottom = node.scrollHeight - node.scrollTop - node.clientHeight <= threshold;
-      setIsNearBottom(nearBottom);
-      if (nearBottom) {
-        setShowNewReply(false);
-      }
-    };
-
-    handleScroll();
-    node.addEventListener("scroll", handleScroll);
-    return () => node.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const prevCount = prevMessageCountRef.current;
-    const newMessageCount = messages.length;
-    const node = scrollRef.current;
-    const lastMessage = messages[newMessageCount - 1];
-    const isNewAssistantMessage = lastMessage?.role === "assistant" && newMessageCount > prevCount;
-
-    if (node && isNewAssistantMessage) {
-      if (isNearBottom) {
-        scrollToBottom();
-      } else {
-        setShowNewReply(true);
-      }
-    }
-
-    prevMessageCountRef.current = newMessageCount;
-  }, [isNearBottom, messages]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -80,7 +34,6 @@ export function ChatPanel({ placeholder, className }: Props) {
         messageCount: messages.length + 1
       });
     }
-    setShowNewReply(false);
     handleSubmit(event);
   };
 
@@ -96,7 +49,7 @@ export function ChatPanel({ placeholder, className }: Props) {
         {isLoading ? <div className="pulse" aria-label="model typing" /> : null}
       </Flex>
 
-      <div className="chat-scroll" ref={scrollRef}>
+      <div className="chat-scroll">
         {messages.length === 0 ? (
           <Card variant="surface" className="message assistant" mb="3">
             <Text size="2" color="gray">
@@ -146,19 +99,9 @@ export function ChatPanel({ placeholder, className }: Props) {
               </Button>
             ))}
           </Flex>
-          <Flex align="center" gap="2">
-            {isLoading ? (
-              <span className="inline-loading">
-                <span className="spinner" aria-hidden />
-                <Text size="1" color="gray">
-                  Generating…
-                </Text>
-              </span>
-            ) : null}
-            <Button type="submit" disabled={!input.trim() || isLoading}>
-              Send
-            </Button>
-          </Flex>
+          <Button type="submit" disabled={!input.trim() || isLoading}>
+            Send
+          </Button>
         </Flex>
 
         <Text size="1" color="gray" mt="2">
@@ -174,27 +117,6 @@ export function ChatPanel({ placeholder, className }: Props) {
           .
         </Text>
       </form>
-
-      {isLoading ? (
-        <div className="floating-pill loading-pill" role="status" aria-live="polite">
-          <span className="spinner" aria-hidden />
-          <Text size="1">Assistant responding…</Text>
-        </div>
-      ) : null}
-
-      {showNewReply && !isNearBottom ? (
-        <Button
-          className="floating-pill new-reply-pill"
-          size="1"
-          variant="solid"
-          onClick={() => {
-            scrollToBottom();
-            setShowNewReply(false);
-          }}
-        >
-          New reply • Jump to latest
-        </Button>
-      ) : null}
     </Card>
   );
 }
