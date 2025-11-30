@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Profile, profileToText } from "./profiles";
@@ -6,6 +7,22 @@ const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
 const EMBEDDING_MODEL = "text-embedding-3-large";
 const EMBEDDING_DIMENSION = 3072;
+
+type RetrievalSource = "pinecone" | "exa";
+
+export type ProfileMatch = {
+  profile: Profile;
+  score: number;
+  snippet: string;
+  source: RetrievalSource;
+};
+
+export type RetrievalResult = {
+  results: ProfileMatch[];
+  fallbackUsed: boolean;
+  fallbackReason?: string;
+  blobUrl?: string;
+};
 
 const embeddings = new OpenAIEmbeddings({
   apiKey: process.env.OPENAI_API_KEY,
@@ -16,8 +33,13 @@ const embeddings = new OpenAIEmbeddings({
 let pineconeClient: Pinecone | null = null;
 let pineconeIndex: ReturnType<Pinecone["index"]> | null = null;
 let pineconeIndexValidated = false;
+const FALLBACK_DEFAULTS = {
+  minScore: 0.3,
+  minHits: 3,
+  scoreDrop: 0.15
+};
 
-export async function retrieveProfiles(query: string, k = 4) {
+export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalResult> {
   const index = getPineconeIndex();
 
   if (!index) {
@@ -30,6 +52,7 @@ export async function retrieveProfiles(query: string, k = 4) {
   }
 
   const vector = await embedText(query);
+  let pineconeMatches: ProfileMatch[] = [];
   try {
     const results = await index.query({
       topK: k,
@@ -38,12 +61,13 @@ export async function retrieveProfiles(query: string, k = 4) {
     });
 
     if (results.matches?.length) {
-      return results.matches.map((match) => {
+      pineconeMatches = results.matches.map((match) => {
         const profile = (match.metadata ?? {}) as Profile;
         return {
           profile,
           score: match.score ?? 0,
-          snippet: profileToText(profile)
+          snippet: profileToText(profile),
+          source: "pinecone" as const
         };
       });
     }
@@ -52,7 +76,29 @@ export async function retrieveProfiles(query: string, k = 4) {
     throw new Error("Pinecone query failed.");
   }
 
-  return [];
+  const fallbackReason = evaluateFallback(pineconeMatches);
+  let fallbackUsed = false;
+  let blobUrl: string | undefined;
+  let combinedResults = pineconeMatches;
+
+  if (fallbackReason) {
+    fallbackUsed = true;
+    console.log(`this is where exa ai will be called: ${query}`);
+
+    const exaResults: ProfileMatch[] = [];
+    combinedResults = dedupeMatches([...pineconeMatches, ...exaResults]);
+
+    const blobKey = buildBlobKey(query);
+    blobUrl = blobKey;
+    void persistExaResultsPlaceholder(exaResults, query, blobKey);
+  }
+
+  return {
+    results: combinedResults,
+    fallbackUsed,
+    fallbackReason,
+    blobUrl
+  };
 }
 
 export function formatProfile(profile: Profile) {
@@ -107,4 +153,48 @@ async function embedText(text: string) {
   }
 
   return embeddings.embedQuery(text);
+}
+
+function evaluateFallback(matches: ProfileMatch[]) {
+  console.log(`evaluateFallback called: ${matches.length} matches found.`);
+  if (!matches.length) return "no_matches";
+
+  const [first, second, third] = matches;
+  if (first.score < FALLBACK_DEFAULTS.minScore) return "low_score";
+  if (matches.length < FALLBACK_DEFAULTS.minHits) return "sparse_hits";
+
+  const thirdScore = third?.score ?? second?.score ?? 0;
+  if (first.score - thirdScore > FALLBACK_DEFAULTS.scoreDrop) return "score_dropoff";
+
+  return null;
+}
+
+function dedupeMatches(matches: ProfileMatch[]) {
+  const seen = new Set<string>();
+  return matches.filter(({ profile }) => {
+    const key = profile.linkedinUrl ?? profile.name;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildBlobKey(query: string) {
+  const hash = createHash("sha256").update(query).digest("hex").slice(0, 8);
+  return `exa-search/${Date.now()}-${hash}.json`;
+}
+
+async function persistExaResultsPlaceholder(
+  exaResults: ProfileMatch[],
+  query: string,
+  blobKey: string
+) {
+  if (!exaResults.length) {
+    console.log("No Exa results to persist for query:", query);
+    return;
+  }
+
+  console.log(
+    `Stub Vercel Blob upload: would write ${exaResults.length} Exa results to ${blobKey} for query "${query}".`
+  );
 }
