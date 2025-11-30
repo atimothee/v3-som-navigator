@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
-import { Profile, profileToText } from "./profiles";
+import { Profile } from "./profiles";
 
 const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
@@ -10,8 +10,10 @@ const EMBEDDING_DIMENSION = 3072;
 
 type RetrievalSource = "pinecone" | "exa";
 
+type PublicProfile = Pick<Profile, "name" | "title" | "summary" | "linkedinUrl">;
+
 export type ProfileMatch = {
-  profile: Profile;
+  profile: PublicProfile;
   score: number;
   snippet: string;
   source: RetrievalSource;
@@ -63,11 +65,11 @@ export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalR
 
     if (results.matches?.length) {
       pineconeMatches = results.matches.map((match) => {
-        const profile = (match.metadata ?? {}) as Profile;
+        const profile = sanitizeProfile(match.metadata ?? {});
         return {
           profile,
           score: match.score ?? 0,
-          snippet: profileToText(profile),
+          snippet: buildSnippet(profile),
           source: "pinecone" as const
         };
       });
@@ -102,14 +104,29 @@ export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalR
   };
 }
 
-export function formatProfile(profile: Profile) {
+export function formatProfile(profile: PublicProfile) {
   return [
-    `${profile.name} (${profile.gradYear}) — ${profile.title}`,
-    `Location: ${profile.location}`,
-    `Interests: ${profile.interests.join(", ")}`,
-    `Availability: ${profile.availability}`,
+    `${profile.name} — ${profile.title}`,
     `LinkedIn: ${profile.linkedinUrl ?? "Not provided"}`,
     `Notes: ${profile.summary}`
+  ].join("\n");
+}
+
+function sanitizeProfile(metadata: any): PublicProfile {
+  const profile = (metadata ?? {}) as Profile;
+  return {
+    name: profile.name,
+    title: profile.title,
+    summary: profile.summary,
+    linkedinUrl: profile.linkedinUrl
+  };
+}
+
+function buildSnippet(profile: PublicProfile) {
+  return [
+    `${profile.name} | ${profile.title}`,
+    `LinkedIn: ${profile.linkedinUrl ?? "Not provided"}`,
+    `Summary: ${profile.summary}`
   ].join("\n");
 }
 
