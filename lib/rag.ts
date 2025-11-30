@@ -83,7 +83,10 @@ async function ensurePineconeIndex(index: ReturnType<Pinecone["index"]>) {
   if (pineconeIndexValidated) return true;
   try {
     const stats = await index.describeIndexStats();
-    const dimension = stats.dimension ?? stats.database?.dimension;
+    // Some Pinecone deployments return dimension nested under database.
+    const dimension =
+      stats.dimension ??
+      (stats as { database?: { dimension?: number } }).database?.dimension;
     if (dimension && dimension !== EMBEDDING_DIMENSION) {
       console.warn(
         `Pinecone index dimension ${dimension} does not match embedding dimension ${EMBEDDING_DIMENSION}.`

@@ -64,7 +64,9 @@ async function validateIndex(
   embeddingClient: OpenAIEmbeddings
 ) {
   const stats = await index.describeIndexStats();
-  const dimension = stats.dimension ?? stats.database?.dimension;
+  const dimension =
+    stats.dimension ??
+    (stats as { database?: { dimension?: number } }).database?.dimension;
   if (dimension && dimension !== EMBEDDING_DIMENSION) {
     throw new Error(`Index dimension ${dimension} does not match expected ${EMBEDDING_DIMENSION}.`);
   }
