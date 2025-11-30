@@ -152,6 +152,7 @@ a {
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 22px 68px rgba(0, 0, 0, 0.4);
   position: relative;
+  padding-bottom: 52px;
 }
 
 .chat-scroll {
@@ -274,6 +275,14 @@ a {
   color: white;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
   z-index: 5;
+}
+
+.loading-pill {
+  border: 1px solid rgba(124, 248, 200, 0.4);
+  pointer-events: none;
+}
+
+.new-reply-pill {
   border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
@@ -391,5 +400,9 @@ a {
 
   .context-strip {
     margin: 0 4px;
+  }
+
+  .loading-pill {
+    display: none;
   }
 }

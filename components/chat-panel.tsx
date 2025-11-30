@@ -6,7 +6,6 @@ import { Button, Card, Flex, Text, TextArea } from "@radix-ui/themes";
 import clsx from "clsx";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import Link from "next/link";
 
 type Props = {
   placeholder?: string;
@@ -26,6 +25,7 @@ export function ChatPanel({ placeholder, className }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [showNewReply, setShowNewReply] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevMessageCountRef = useRef(0);
 
@@ -39,6 +39,13 @@ export function ChatPanel({ placeholder, className }: Props) {
     const node = scrollRef.current;
     if (!node) return;
 
+    const handleResize = () => {
+      if (typeof window === "undefined") return;
+      setIsDesktop(window.matchMedia("(min-width: 768px)").matches);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
     const handleScroll = () => {
       const threshold = 150;
       const nearBottom = node.scrollHeight - node.scrollTop - node.clientHeight <= threshold;
@@ -50,15 +57,18 @@ export function ChatPanel({ placeholder, className }: Props) {
 
     handleScroll();
     node.addEventListener("scroll", handleScroll);
-    return () => node.removeEventListener("scroll", handleScroll);
+    return () => {
+      node.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
     const prevCount = prevMessageCountRef.current;
-    const newCount = messages.length;
+    const newMessageCount = messages.length;
     const node = scrollRef.current;
-    const lastMessage = messages[newCount - 1];
-    const isNewAssistantMessage = lastMessage?.role === "assistant" && newCount > prevCount;
+    const lastMessage = messages[newMessageCount - 1];
+    const isNewAssistantMessage = lastMessage?.role === "assistant" && newMessageCount > prevCount;
 
     if (node && isNewAssistantMessage) {
       if (isNearBottom) {
@@ -68,7 +78,7 @@ export function ChatPanel({ placeholder, className }: Props) {
       }
     }
 
-    prevMessageCountRef.current = newCount;
+    prevMessageCountRef.current = newMessageCount;
   }, [isNearBottom, messages]);
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -162,18 +172,16 @@ export function ChatPanel({ placeholder, className }: Props) {
         </Flex>
 
         <Text size="1" color="gray" mt="2">
-          Found issue? Give us{" "}
-          <Link
-            href="https://forms.gle/pjzU8X8eKQ4YMRrq9"
-            target="_blank"
-            rel="noreferrer"
-            style={{ textDecoration: "underline" }}
-          >
-            feedback
-          </Link>
-          .
+          Tip: ask for 2–3 alum matches plus a ready-to-send opener.
         </Text>
       </form>
+
+      {isLoading && isDesktop ? (
+        <div className="floating-pill loading-pill" role="status" aria-live="polite">
+          <span className="spinner" aria-hidden />
+          <Text size="1">Assistant responding…</Text>
+        </div>
+      ) : null}
 
       {showNewReply && !isNearBottom ? (
         <Button
