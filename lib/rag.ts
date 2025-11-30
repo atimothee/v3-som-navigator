@@ -6,15 +6,19 @@ import { Profile, loadProfilesFromDocs, profileToText } from "./profiles";
 
 const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
-const EMBEDDING_MODEL = "llama-text-embed-v2";
+const EMBEDDING_MODEL = "text-embedding-3-large";
+const EMBEDDING_DIMENSION = 3072;
 
 const embeddings = new OpenAIEmbeddings({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
+  model: EMBEDDING_MODEL,
+  dimensions: EMBEDDING_DIMENSION
 });
 
 let vectorStorePromise: Promise<MemoryVectorStore> | null = null;
 let pineconeClient: Pinecone | null = null;
 let pineconeIndex: ReturnType<Pinecone["index"]> | null = null;
+let pineconeIndexValidated = false;
 
 async function buildVectorStore() {
   const profiles: Profile[] = loadProfilesFromDocs();
@@ -45,28 +49,32 @@ export async function retrieveProfiles(query: string, k = 4) {
     return retrieveFromMemory(query, k);
   }
 
-  if (index) {
-    try {
-      const vector = await embedText(query);
-      const results = await index.query({
-        topK: k,
-        vector,
-        includeMetadata: true
-      });
+  const ready = await ensurePineconeIndex(index);
+  if (!ready) {
+    console.warn("Pinecone index not ready; using in-memory search.");
+    return retrieveFromMemory(query, k);
+  }
 
-      if (results.matches?.length) {
-        return results.matches.map((match) => {
-          const profile = (match.metadata ?? {}) as Profile;
-          return {
-            profile,
-            score: match.score ?? 0,
-            snippet: profileToText(profile)
-          };
-        });
-      }
-    } catch (err) {
-      console.warn("Pinecone query failed; falling back to in-memory store.", err);
+  try {
+    const vector = await embedText(query);
+    const results = await index.query({
+      topK: k,
+      vector,
+      includeMetadata: true
+    });
+
+    if (results.matches?.length) {
+      return results.matches.map((match) => {
+        const profile = (match.metadata ?? {}) as Profile;
+        return {
+          profile,
+          score: match.score ?? 0,
+          snippet: profileToText(profile)
+        };
+      });
     }
+  } catch (err) {
+    console.warn("Pinecone query failed; falling back to in-memory store.", err);
   }
 
   return retrieveFromMemory(query, k);
@@ -103,25 +111,33 @@ function getPineconeIndex() {
   });
 
   pineconeIndex = pineconeClient.index(PINECONE_INDEX);
+  pineconeIndexValidated = false;
   return pineconeIndex;
 }
 
+async function ensurePineconeIndex(index: ReturnType<Pinecone["index"]>) {
+  if (pineconeIndexValidated) return true;
+  try {
+    const stats = await index.describeIndexStats();
+    const dimension = stats.dimension ?? stats.database?.dimension;
+    if (dimension && dimension !== EMBEDDING_DIMENSION) {
+      console.warn(
+        `Pinecone index dimension ${dimension} does not match embedding dimension ${EMBEDDING_DIMENSION}.`
+      );
+      return false;
+    }
+    pineconeIndexValidated = true;
+    return true;
+  } catch (err) {
+    console.warn("Failed to validate Pinecone index stats.", err);
+    return false;
+  }
+}
+
 async function embedText(text: string) {
-  if (!pineconeClient) getPineconeIndex();
-  if (!pineconeClient) {
-    throw new Error("Pinecone is not configured.");
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key missing for embedding.");
   }
 
-  const response = await pineconeClient.inference.embed({
-    model: EMBEDDING_MODEL,
-    input: text,
-    parameters: { inputType: "query" }
-  });
-
-  const vector = response.data?.[0]?.values;
-  if (!vector?.length) {
-    throw new Error("Pinecone returned no embedding data.");
-  }
-
-  return vector;
+  return embeddings.embedQuery(text);
 }

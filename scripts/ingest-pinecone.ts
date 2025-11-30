@@ -1,12 +1,13 @@
 import "dotenv/config";
 
 import { Pinecone } from "@pinecone-database/pinecone";
+import { OpenAIEmbeddings } from "@langchain/openai";
 
 import { loadProfilesFromDocs, profileToText, type Profile } from "../lib/profiles";
 
-const EMBEDDING_MODEL = "llama-text-embed-v2";
+const EMBEDDING_MODEL = "text-embedding-3-large";
+const EMBEDDING_DIMENSION = 3072;
 const BATCH_SIZE = 20;
-const EXPECTED_DIMENSION = 4096;
 
 async function main() {
   const apiKey = process.env.PINECONE_API_KEY;
@@ -16,10 +17,16 @@ async function main() {
     throw new Error("PINECONE_API_KEY and PINECONE_INDEX are required.");
   }
 
+  const embeddingClient = new OpenAIEmbeddings({
+    apiKey: process.env.OPENAI_API_KEY,
+    model: EMBEDDING_MODEL,
+    dimensions: EMBEDDING_DIMENSION
+  });
+
   const pinecone = new Pinecone({ apiKey });
 
   const index = pinecone.index(indexName);
-  await validateIndex(pinecone, index);
+  await validateIndex(index, embeddingClient);
 
   const profiles = loadProfilesFromDocs();
   if (!profiles.length) {
@@ -34,7 +41,7 @@ async function main() {
     const batchProfiles = profiles.slice(start, start + BATCH_SIZE);
     const batchIds = ids.slice(start, start + BATCH_SIZE);
     const texts = batchProfiles.map((profile) => profileToText(profile));
-    const vectors = await embedDocuments(pinecone, texts);
+    const vectors = await embedDocuments(embeddingClient, texts);
 
     const payload = vectors.map((values, idx) => ({
       id: batchIds[idx],
@@ -49,66 +56,52 @@ async function main() {
   console.log("Ingest complete.");
 
   const sampleQuery = process.argv.slice(2).join(" ") || "school of management alumni interested in fintech";
-  await runSampleQuery(pinecone, index, sampleQuery);
+  await runSampleQuery(embeddingClient, index, sampleQuery);
 }
 
-async function validateIndex(pinecone: Pinecone, index: ReturnType<Pinecone["index"]>) {
+async function validateIndex(
+  index: ReturnType<Pinecone["index"]>,
+  embeddingClient: OpenAIEmbeddings
+) {
   const stats = await index.describeIndexStats();
   const dimension = stats.dimension ?? stats.database?.dimension;
-  if (dimension && dimension !== EXPECTED_DIMENSION) {
-    throw new Error(`Index dimension ${dimension} does not match expected ${EXPECTED_DIMENSION}.`);
+  if (dimension && dimension !== EMBEDDING_DIMENSION) {
+    throw new Error(`Index dimension ${dimension} does not match expected ${EMBEDDING_DIMENSION}.`);
   }
 
-  const sample = await pinecone.inference.embed({
-    model: EMBEDDING_MODEL,
-    input: "dimension check",
-    parameters: { inputType: "query" }
-  });
-
-  const embedDim = sample.data?.[0]?.values?.length;
-  if (embedDim && embedDim !== EXPECTED_DIMENSION) {
-    throw new Error(`Embedding dimension ${embedDim} does not match expected ${EXPECTED_DIMENSION}.`);
+  const sample = await embeddingClient.embedQuery("dimension check");
+  const embedDim = sample.length;
+  if (embedDim && embedDim !== EMBEDDING_DIMENSION) {
+    throw new Error(`Embedding dimension ${embedDim} does not match expected ${EMBEDDING_DIMENSION}.`);
   }
 }
 
-async function embedDocuments(pinecone: Pinecone, texts: string[]) {
-  const response = await pinecone.inference.embed({
-    model: EMBEDDING_MODEL,
-    input: texts,
-    parameters: { inputType: "document" }
-  });
-
-  const vectors = response.data?.map((item) => item.values ?? []);
+async function embedDocuments(embeddingClient: OpenAIEmbeddings, texts: string[]) {
+  const vectors = await embeddingClient.embedDocuments(texts);
   if (!vectors?.length || !vectors[0]?.length) {
-    throw new Error("No embeddings returned from Pinecone Inference.");
+    throw new Error("No embeddings returned from OpenAI.");
   }
 
   return vectors;
 }
 
-async function embedQuery(pinecone: Pinecone, text: string) {
-  const response = await pinecone.inference.embed({
-    model: EMBEDDING_MODEL,
-    input: text,
-    parameters: { inputType: "query" }
-  });
-
-  const vector = response.data?.[0]?.values;
+async function embedQuery(embeddingClient: OpenAIEmbeddings, text: string) {
+  const vector = await embeddingClient.embedQuery(text);
   if (!vector?.length) {
-    throw new Error("No query embedding returned from Pinecone Inference.");
+    throw new Error("No query embedding returned from OpenAI.");
   }
 
   return vector;
 }
 
 async function runSampleQuery(
-  pinecone: Pinecone,
+  embeddingClient: OpenAIEmbeddings,
   index: ReturnType<Pinecone["index"]>,
   query: string
 ) {
   try {
     console.log(`Sample query: "${query}"`);
-    const vector = await embedQuery(pinecone, query);
+    const vector = await embedQuery(embeddingClient, query);
     const results = await index.query({ vector, topK: 3, includeMetadata: true });
 
     if (!results.matches?.length) {
