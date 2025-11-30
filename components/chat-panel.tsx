@@ -25,6 +25,7 @@ export function ChatPanel({ placeholder, className }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [showNewReply, setShowNewReply] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevMessageCountRef = useRef(0);
 
@@ -38,6 +39,13 @@ export function ChatPanel({ placeholder, className }: Props) {
     const node = scrollRef.current;
     if (!node) return;
 
+    const handleResize = () => {
+      if (typeof window === "undefined") return;
+      setIsDesktop(window.matchMedia("(min-width: 768px)").matches);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
     const handleScroll = () => {
       const threshold = 150;
       const nearBottom = node.scrollHeight - node.scrollTop - node.clientHeight <= threshold;
@@ -49,7 +57,10 @@ export function ChatPanel({ placeholder, className }: Props) {
 
     handleScroll();
     node.addEventListener("scroll", handleScroll);
-    return () => node.removeEventListener("scroll", handleScroll);
+    return () => {
+      node.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -165,7 +176,7 @@ export function ChatPanel({ placeholder, className }: Props) {
         </Text>
       </form>
 
-      {isLoading ? (
+      {isLoading && isDesktop ? (
         <div className="floating-pill loading-pill" role="status" aria-live="polite">
           <span className="spinner" aria-hidden />
           <Text size="1">Assistant responding…</Text>
