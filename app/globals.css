@@ -338,10 +338,10 @@ a {
 
 @media (max-width: 640px) {
   .chat-spotlight {
-    margin-left: -24px;
-    margin-right: -24px;
-    padding: 10px 12px;
+    margin: 0;
+    padding: 0;
     border-radius: 0;
+    background: none;
   }
 
   .chat-panel-wrap {
