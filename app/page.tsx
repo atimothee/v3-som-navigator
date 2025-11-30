@@ -1,4 +1,3 @@
-import { ChatPanel } from "@/components/chat-panel";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Inset, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
 
@@ -18,31 +17,25 @@ const stats = [
 
 export default function Page() {
   return (
-    <Container size="3" px="5" py="6">
-      <Flex direction="column" gap="6" className="hero">
-        <Flex direction={{ initial: "column", md: "row" }} gap="6" align="center">
-          <Box style={{ flex: 1 }}>
-            <Badge color="green" variant="soft" radius="full">
-              SOM Network Navigator
-            </Badge>
-            <Heading size="9" mt="3" mb="3">
-              Navigate the SOM network, with AI assistance.
-            </Heading>
-            <Text size="4" color="gray">
-              Your guide to effortless SOM coffee chats. Find the right alum, faster. Try a prompt, then dive deeper.
-            </Text>
+    <Container size="4" px="5" py="6">
+      <Flex direction="column" gap="6" className="hero" style={{ maxWidth: "780px", margin: "0 auto" }}>
+        <Box>
+          <Badge color="green" variant="soft" radius="full">
+            Yale SOM Network Navigator
+          </Badge>
+          <Heading size="9" mt="3" mb="3">
+            Navigate the Yale SOM network, with AI assistance.
+          </Heading>
+          <Text size="4" color="gray">
+            Your guide to effortless SOM coffee chats. Find the right alum, faster. Try a prompt, then dive deeper.
+          </Text>
 
-            <Flex gap="3" mt="4" wrap="wrap">
-              <Button size="3" asChild>
-                <Link href="/chat">Try the chatbot</Link>
-              </Button>
-            </Flex>
-          </Box>
-
-          <Box id="try" width="100%" style={{ flex: 1 }}>
-            <ChatPanel />
-          </Box>
-        </Flex>
+          <Flex gap="3" mt="4" wrap="wrap">
+            <Button size="3" asChild>
+              <Link href="/chat">Try the chatbot</Link>
+            </Button>
+          </Flex>
+        </Box>
 
         <Separator size="4" />
 
