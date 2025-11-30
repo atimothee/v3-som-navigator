@@ -1,7 +1,6 @@
 import { ChatPanel } from "@/components/chat-panel";
 import { LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
-import Link from "next/link";
 
 const perks = [
   { icon: <LightningBoltIcon />, title: "Fast matches", body: "RAG-powered picks across roles, regions, and vibes." },
@@ -23,9 +22,6 @@ export default function ChatPage() {
             </Heading>
             <Text size="4" color="gray" align="center" style={{ maxWidth: "780px" }}>
               Find the right alum to contact, copy an opener, and prep your coffee chat in minutes.
-            </Text>
-            <Text size="2" color="gray" align="center">
-              Share feedback <Link href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer">here</Link>.
             </Text>
           </Flex>
 
