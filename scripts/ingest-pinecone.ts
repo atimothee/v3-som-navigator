@@ -7,7 +7,7 @@ import { loadProfilesFromDocs, profileToText, type Profile } from "../lib/profil
 
 const EMBEDDING_MODEL = "text-embedding-3-large";
 const EMBEDDING_DIMENSION = 3072;
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 5;
 
 async function main() {
   const apiKey = process.env.PINECONE_API_KEY;
