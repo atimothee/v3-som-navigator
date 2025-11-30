@@ -23,15 +23,23 @@ export async function POST(req: NextRequest) {
             .join(" ")
         : "";
 
-  let matches = [] as Awaited<ReturnType<typeof retrieveProfiles>>;
+  let retrieval = null as Awaited<ReturnType<typeof retrieveProfiles>> | null;
   try {
-    matches = await retrieveProfiles(userQuestion);
+    retrieval = await retrieveProfiles(userQuestion);
   } catch (err) {
     console.error("Failed to retrieve profiles via Pinecone:", err);
     return new Response("Pinecone retrieval unavailable. Check Pinecone configuration and index readiness.", { status: 500 });
   }
 
+  const matches = retrieval?.results ?? [];
   console.log("Retrieved profiles:", matches);
+  if (retrieval?.fallbackUsed) {
+    console.log("Fallback was triggered.", {
+      fallbackReason: retrieval.fallbackReason,
+      blobUrl: retrieval.blobUrl
+    });
+  }
+
   const context = matches.map(({ profile }) => formatProfile(profile)).join("\n\n") ||
     "No specific context matched; offer general networking guidance for SOM coffee chats.";
 
