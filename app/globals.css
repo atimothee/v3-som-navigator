@@ -335,3 +335,20 @@ a {
     box-shadow: 0 0 0 0 rgba(124, 248, 200, 0);
   }
 }
+
+@media (max-width: 640px) {
+  .chat-spotlight {
+    margin-left: -24px;
+    margin-right: -24px;
+    padding: 10px 12px;
+    border-radius: 0;
+  }
+
+  .chat-panel-wrap {
+    max-width: none;
+  }
+
+  .context-strip {
+    margin: 0 4px;
+  }
+}
