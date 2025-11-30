@@ -9,6 +9,7 @@ export type Profile = {
   interests: string[];
   summary: string;
   availability: string;
+  linkedinUrl?: string;
 };
 
 export function loadProfilesFromDocs(): Profile[] {
@@ -40,6 +41,7 @@ export function profileToText(profile: Profile) {
     `${profile.name} | ${profile.title} | ${profile.gradYear} | ${profile.location}`,
     `Interests: ${profile.interests.join(", ")}`,
     `Availability: ${profile.availability}`,
+    `LinkedIn: ${profile.linkedinUrl ?? "Not provided"}`,
     `Summary: ${profile.summary}`
   ].join("\n");
 }
@@ -56,6 +58,7 @@ export function normalizeProfile(input: any): Profile | null {
   const interests = normalizeInterests(input.interests ?? input.tags ?? input.keywords);
   const summary = (input.summary ?? input.bio ?? input.description ?? "").toString().trim();
   const availability = input.availability ?? input.slots ?? "Availability not provided";
+  const linkedinUrl = normalizeLinkedinUrl(input);
 
   if (!name || !title || !summary) return null;
 
@@ -66,7 +69,8 @@ export function normalizeProfile(input: any): Profile | null {
     location: String(location),
     interests,
     summary: String(summary),
-    availability: String(availability)
+    availability: String(availability),
+    linkedinUrl: linkedinUrl || undefined
   };
 }
 
@@ -103,4 +107,14 @@ function cleanTitle(title: string, name: string | null): string {
   }
 
   return cleaned;
+}
+
+function normalizeLinkedinUrl(input: any): string | null {
+  const candidates = [input.linkedinUrl, input.linkedin, input.url, input.id];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim().startsWith("http")) {
+      return value.trim();
+    }
+  }
+  return null;
 }

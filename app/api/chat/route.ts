@@ -23,7 +23,14 @@ export async function POST(req: NextRequest) {
             .join(" ")
         : "";
 
-  const matches = await retrieveProfiles(userQuestion);
+  let matches = [] as Awaited<ReturnType<typeof retrieveProfiles>>;
+  try {
+    matches = await retrieveProfiles(userQuestion);
+  } catch (err) {
+    console.error("Failed to retrieve profiles via Pinecone:", err);
+    return new Response("Pinecone retrieval unavailable. Check Pinecone configuration and index readiness.", { status: 500 });
+  }
+
   console.log("Retrieved profiles:", matches);
   const context = matches.map(({ profile }) => formatProfile(profile)).join("\n\n") ||
     "No specific context matched; offer general networking guidance for SOM coffee chats.";
