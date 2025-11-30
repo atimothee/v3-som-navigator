@@ -6,8 +6,6 @@ import { Profile, loadProfilesFromDocs, profileToText } from "./profiles";
 
 const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
-const PINECONE_ENV = process.env.PINECONE_ENV;
-const PINECONE_PROJECT_ID = process.env.PINECONE_PROJECT_ID;
 const EMBEDDING_MODEL = "llama-text-embed-v2";
 
 const embeddings = new OpenAIEmbeddings({
@@ -101,9 +99,7 @@ function getPineconeIndex() {
   if (!PINECONE_API_KEY || !PINECONE_INDEX) return null;
 
   pineconeClient = new Pinecone({
-    apiKey: PINECONE_API_KEY,
-    environment: PINECONE_ENV,
-    projectId: PINECONE_PROJECT_ID
+    apiKey: PINECONE_API_KEY
   });
 
   pineconeIndex = pineconeClient.index(PINECONE_INDEX);

@@ -16,11 +16,7 @@ async function main() {
     throw new Error("PINECONE_API_KEY and PINECONE_INDEX are required.");
   }
 
-  const pinecone = new Pinecone({
-    apiKey,
-    environment: process.env.PINECONE_ENV,
-    projectId: process.env.PINECONE_PROJECT_ID
-  });
+  const pinecone = new Pinecone({ apiKey });
 
   const index = pinecone.index(indexName);
   await validateIndex(pinecone, index);
