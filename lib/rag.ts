@@ -61,6 +61,7 @@ export function formatProfile(profile: Profile) {
     `Location: ${profile.location}`,
     `Interests: ${profile.interests.join(", ")}`,
     `Availability: ${profile.availability}`,
+    `LinkedIn: ${profile.linkedinUrl ?? "Not provided"}`,
     `Notes: ${profile.summary}`
   ].join("\n");
 }
