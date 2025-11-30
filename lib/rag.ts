@@ -155,7 +155,7 @@ async function embedText(text: string) {
   return embeddings.embedQuery(text);
 }
 
-function evaluateFallback(matches: ProfileMatch[]) {
+function evaluateFallback(matches: ProfileMatch[]): string | undefined {
   console.log(`evaluateFallback called: ${matches.length} matches found.`);
   if (!matches.length) return "no_matches";
 
@@ -166,7 +166,7 @@ function evaluateFallback(matches: ProfileMatch[]) {
   const thirdScore = third?.score ?? second?.score ?? 0;
   if (first.score - thirdScore > FALLBACK_DEFAULTS.scoreDrop) return "score_dropoff";
 
-  return null;
+  return undefined;
 }
 
 function dedupeMatches(matches: ProfileMatch[]) {
