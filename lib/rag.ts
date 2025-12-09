@@ -7,6 +7,9 @@ const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
 const EMBEDDING_MODEL = "text-embedding-3-large";
 const EMBEDDING_DIMENSION = 3072;
+const MIN_CONTEXT_PROFILES = 10;
+const DEFAULT_TOP_K = 20;
+const TOP_K_BUFFER = 5;
 
 type RetrievalSource = "pinecone" | "exa";
 
@@ -41,7 +44,7 @@ const FALLBACK_DEFAULTS = {
   scoreDrop: 0.15
 };
 
-export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalResult> {
+export async function retrieveProfiles(query: string, k = MIN_CONTEXT_PROFILES): Promise<RetrievalResult> {
   const index = getPineconeIndex();
 
   if (!index) {
@@ -55,9 +58,10 @@ export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalR
 
   const vector = await embedText(query);
   let pineconeMatches: ProfileMatch[] = [];
+  const topK = Math.max(k, DEFAULT_TOP_K, MIN_CONTEXT_PROFILES + TOP_K_BUFFER);
   try {
     const results = await index.query({
-      topK: k,
+      topK,
       vector,
       includeMetadata: true
     });
@@ -79,17 +83,25 @@ export async function retrieveProfiles(query: string, k = 4): Promise<RetrievalR
     throw new Error("Pinecone query failed.");
   }
 
-  const fallbackReason = evaluateFallback(pineconeMatches);
+  const uniqueMatches = dedupeMatches(pineconeMatches);
+  const limitedMatches = uniqueMatches.slice(0, Math.max(MIN_CONTEXT_PROFILES, topK));
+  const fallbackReason = evaluateFallback(limitedMatches);
   let fallbackUsed = false;
   let blobUrl: string | undefined;
-  let combinedResults = pineconeMatches;
+  let combinedResults = limitedMatches;
+
+  if (combinedResults.length < MIN_CONTEXT_PROFILES) {
+    console.warn(
+      `Only ${combinedResults.length} unique Pinecone results found; consider re-ingesting docs or increasing query coverage.`
+    );
+  }
 
   if (fallbackReason) {
     fallbackUsed = true;
     console.log(`this is where exa ai will be called: ${query}`);
 
     const exaResults: ProfileMatch[] = [];
-    combinedResults = dedupeMatches([...pineconeMatches, ...exaResults]);
+    combinedResults = dedupeMatches([...combinedResults, ...exaResults]);
 
     const blobKey = buildBlobKey(query);
     blobUrl = blobKey;
