@@ -5,6 +5,10 @@ import { formatProfile, retrieveProfiles } from "@/lib/rag";
 
 export const runtime = "nodejs";
 
+const CONTEXT_PROFILE_LIMIT = 10;
+const PROFILE_DISPLAY_MIN = 7;
+const PROFILE_DISPLAY_MAX = 10;
+
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
     return new Response("Missing OPENAI_API_KEY", { status: 500 });
@@ -40,13 +44,20 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const context = matches.map(({ profile }) => formatProfile(profile)).join("\n\n") ||
-    "No specific context matched; offer general networking guidance for SOM coffee chats.";
+  const contextMatches = matches.slice(0, CONTEXT_PROFILE_LIMIT);
+  const context =
+    contextMatches.length
+      ? contextMatches.map(({ profile }) => formatProfile(profile)).join("\n\n")
+      : "No specific context matched; offer general networking guidance for SOM coffee chats.";
+
+  const profileInstruction =
+    `Highlight ${PROFILE_DISPLAY_MIN}-${PROFILE_DISPLAY_MAX} profiles from the available context (use all if fewer than ${PROFILE_DISPLAY_MIN} appear), each with LinkedIn references and location hints.`;
 
   const system =
     "You are the SOM Network Navigator, a warm guide for connecting Yale SOM students and alumni for coffee chats.\n" +
-    "Use the provided alum context to recommend 2-3 specific people with reasons.\n" +
-    "Be concise, prefer short bullets, include link to Linkedin profile + location hints, and add a brief outreach opener when asked.\n\n" +
+    `Use the provided alum context to recommend 5-10 specific people with reasons.\n` +
+    "Be concise, prefer short bullets, include link to Linkedin profile + location hints, and add a brief outreach opener when asked.\n" +
+    `${profileInstruction}\n\n` +
     "Strict rules:" +
     "\n- Only recommend people from the provided alum context." +
     "\n- If no relevant alum context is provided, give general advice on how to approach coffee chats." +
