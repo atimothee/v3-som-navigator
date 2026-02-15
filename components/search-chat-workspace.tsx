@@ -23,7 +23,7 @@ type SuperSearchResult = {
   source: SuperSearchProvider;
 };
 
-export function SearchChatWorkspace({ hasProfileDocument }: { hasProfileDocument: boolean }) {
+export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocumentText: boolean }) {
   const [chatSeed, setChatSeed] = useState<{ text: string; nonce: number } | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
   const [superProvider, setSuperProvider] = useState<SuperSearchProvider>("exa");
@@ -133,12 +133,12 @@ export function SearchChatWorkspace({ hasProfileDocument }: { hasProfileDocument
         <Flex justify="between" align="center" wrap="wrap" gap="3">
           <Heading size="6">Super Search</Heading>
           <Flex direction="column" align="end" gap="1">
-            <Text size="1" color={hasProfileDocument ? "green" : "gray"}>
-              {hasProfileDocument ? (
+            <Text size="1" color={hasProfileDocumentText ? "green" : "gray"}>
+              {hasProfileDocumentText ? (
                 "Personalized opener mode is on"
               ) : (
                 <>
-                  Upload resume/LinkedIn PDF for personalization.{" "}
+                  Upload resume/LinkedIn PDF with extractable text for personalization.{" "}
                   <Link href="/account/profile-document" style={{ textDecoration: "underline" }}>
                     Add now
                   </Link>
@@ -273,14 +273,16 @@ export function SearchChatWorkspace({ hasProfileDocument }: { hasProfileDocument
                       onClick={() =>
                         setChatSeed({
                           text:
-                            `Draft 2 short coffee-chat opener options for this person. Focus on likely common ground between my background and theirs if you have my uploaded resume/LinkedIn PDF.\n` +
+                            `Generate one LinkedIn DM opener for this target using resume-to-LinkedIn opener mode.\n` +
+                            `Use my uploaded resume/LinkedIn PDF text as sender context if available.\n` +
                             `Target person:\n` +
                             `- Name: ${result.name}\n` +
                             `- Title: ${result.title}\n` +
                             `- Location: ${result.location}\n` +
                             `- Interests: ${result.interests.join(", ") || "Not listed"}\n` +
                             `- Summary: ${result.summary}\n` +
-                            `- LinkedIn: ${result.linkedinUrl ?? "Not provided"}`,
+                            `- LinkedIn: ${result.linkedinUrl ?? "Not provided"}\n` +
+                            `Return only the final LinkedIn DM message.`,
                           nonce: Date.now()
                         })
                       }

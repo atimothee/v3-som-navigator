@@ -1,5 +1,5 @@
 import { SearchChatWorkspace } from "@/components/search-chat-workspace";
-import { parseStoredProfileDocument } from "@/lib/profile-document";
+import { resolveStoredProfileDocument } from "@/lib/profile-document";
 import { requireYaleUser } from "@/lib/require-yale-user";
 import { currentUser } from "@clerk/nextjs/server";
 import { Badge, Container, Flex, Heading, Text } from "@radix-ui/themes";
@@ -7,7 +7,7 @@ import { Badge, Container, Flex, Heading, Text } from "@radix-ui/themes";
 export default async function ChatPage() {
   await requireYaleUser();
   const user = await currentUser();
-  const storedDoc = parseStoredProfileDocument(user?.privateMetadata);
+  const storedDoc = resolveStoredProfileDocument(user);
 
   return (
     <div className="chat-page">
@@ -25,7 +25,7 @@ export default async function ChatPage() {
             </Text>
           </Flex>
 
-          <SearchChatWorkspace hasProfileDocument={Boolean(storedDoc)} />
+          <SearchChatWorkspace hasProfileDocumentText={Boolean(storedDoc?.extractedText)} />
         </Flex>
       </Container>
     </div>
