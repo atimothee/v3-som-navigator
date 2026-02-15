@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { AnalyticsIdentify } from "@/components/analytics-identify";
 import { AnalyticsProvider } from "@/components/analytics-provider";
+import { NonYaleRedirect } from "@/components/non-yale-redirect";
 import { Theme } from "@radix-ui/themes";
 import {
   ClerkProvider,
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <AnalyticsProvider />
               <AnalyticsIdentify />
             </Suspense>
+            <NonYaleRedirect />
             <div className="page-shell">
               <header className="site-header">
                 <SignedOut>
