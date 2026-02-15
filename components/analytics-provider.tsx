@@ -24,6 +24,13 @@ function getElementLabel(element: HTMLElement) {
   return element.tagName.toLowerCase();
 }
 
+function getControlType(element: HTMLElement) {
+  if (element instanceof HTMLInputElement) return element.type || "text";
+  if (element instanceof HTMLTextAreaElement) return "textarea";
+  if (element instanceof HTMLSelectElement) return "select";
+  return element.tagName.toLowerCase();
+}
+
 export function AnalyticsProvider() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -50,8 +57,47 @@ export function AnalyticsProvider() {
       });
     };
 
+    const handleSubmit = (event: SubmitEvent) => {
+      const form = event.target as HTMLFormElement | null;
+      if (!form) return;
+
+      const formLabel =
+        form.dataset.analyticsLabel || form.getAttribute("name") || form.getAttribute("id") || "form";
+
+      trackEvent("UI Form Submitted", {
+        path: pathname,
+        label: formLabel
+      });
+    };
+
+    const handleChange = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement)) return;
+
+      // Avoid capturing free-text content and high-volume keystroke-like changes.
+      const shouldTrack =
+        target instanceof HTMLSelectElement ||
+        (target instanceof HTMLInputElement && ["checkbox", "radio", "file", "range"].includes(target.type));
+
+      if (!shouldTrack) return;
+
+      trackEvent("UI Field Changed", {
+        path: pathname,
+        label: getElementLabel(target),
+        type: getControlType(target)
+      });
+    };
+
     window.addEventListener("click", handleClick, { capture: true });
-    return () => window.removeEventListener("click", handleClick, { capture: true });
+    window.addEventListener("submit", handleSubmit, { capture: true });
+    window.addEventListener("change", handleChange, { capture: true });
+
+    return () => {
+      window.removeEventListener("click", handleClick, { capture: true });
+      window.removeEventListener("submit", handleSubmit, { capture: true });
+      window.removeEventListener("change", handleChange, { capture: true });
+    };
   }, [pathname]);
 
   return null;
