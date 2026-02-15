@@ -66,7 +66,3 @@ Vercel automatically runs `npm run build` before deploying; ensure your `.env` k
 4. Confirm the console logs mention vector retrieval and optionally run `npm run lint` or the ingest/delete scripts (`npm run ingest:pinecone`) to validate data pipeline scripts.
 
 If you’re validating deployment, trigger a preview on Vercel and repeat the workspace flow to ensure the `OPENAI_API_KEY` and Pinecone keys work in that environment as well.
-
-## EXA profile ingestion Colab
-
-We used an [EXA API-powered Colab workbook](https://colab.research.google.com/drive/1Y79r6ytJNWCYjEh7AxPFRMe8foL23Ld3?usp=sharing) backed by https://exa.ai/ to fetch and enrich LinkedIn alumni profiles before ingesting them into Pinecone. The notebook walks through authentication, query construction, and exporting the resulting profile artifacts that feed `data/docs/combined_profiles.json`; follow it whenever you need to refresh or extend the dataset with new EXA output.
