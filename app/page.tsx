@@ -3,16 +3,16 @@ import { SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
 
 const stats = [
-  { label: "10k+ alums indexed", value: "Alums at your fingertips", detail: "Thousands searchable now; expands with your data." },
+  { label: "10k+ alums indexed", value: "Natural-language people search", detail: "Describe who you want to meet. No filter maze required." },
   {
-    label: "Coffee chats",
-    value: "Outreach-ready copy",
-    detail: "Get a match and a paste-ready note so you can book faster."
+    label: "Personalized outreach",
+    value: "Drafts tuned to your profile",
+    detail: "Generate opener text grounded in your resume or LinkedIn PDF."
   },
   {
-    label: "Plain language",
-    value: "No filters needed",
-    detail: "Type your goal, vibe, or draft opener. We pick up the intent."
+    label: "AI architecture",
+    value: "Built with RAG pipeline",
+    detail: "LangChain orchestration + Pinecone vector retrieval + OpenAI generation."
   }
 ];
 
@@ -27,21 +27,21 @@ export default async function Page() {
                 Yale SOM Network Navigator
               </Badge>
               <Heading size="9" mt="3" mb="3">
-                Navigate the Yale SOM network, with AI assistance.
+                Find the right SOM alumni. Draft outreach that gets replies.
               </Heading>
               <Text size="4" color="gray">
-                Your guide to effortless SOM coffee chats. Find the right alum, faster. Try a prompt, then dive deeper.
+                Search the SOM network in plain English, then generate personalized outreach in minutes.
               </Text>
 
               <Flex gap="3" mt="4" wrap="wrap">
                 <SignedIn>
                   <Button size="3" className="home-cta" asChild>
-                    <Link href="/chat">Try the chatbot</Link>
+                    <Link href="/workspace">Open workspace</Link>
                   </Button>
                 </SignedIn>
                 <SignedOut>
                   <Button size="3" className="home-cta" asChild>
-                    <Link href="/sign-in?redirect_url=%2Fchat">Try the chatbot</Link>
+                    <Link href="/sign-in?redirect_url=%2Fworkspace">Try it now</Link>
                   </Button>
                 </SignedOut>
               </Flex>
@@ -73,9 +73,9 @@ export default async function Page() {
                   How it works
                 </Heading>
                 <Grid columns={{ initial: "1", md: "3" }} gap="4">
-                  <Step title="1. Ask anything" body="Describe your goal, a role, a region, or the vibe you want." />
-                  <Step title="2. RAG with LangChain" body="We embed the SOM network profiles into a vector store and retrieve context for the model." />
-                  <Step title="3. Outreach-ready replies" body="You get suggested matches, availability, and a short intro line to copy." />
+                  <Step title="1. Describe target alumni" body="Use plain language: role, industry, geography, and outreach goal." />
+                  <Step title="2. Retrieve with RAG" body="LangChain routes your query through embeddings and Pinecone vector search to ground results." />
+                  <Step title="3. Draft personalized outreach" body="Generate a concise opener tailored to your background and the selected profile." />
                 </Grid>
               </Container>
             </Inset>

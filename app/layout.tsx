@@ -38,7 +38,7 @@ const clerkAppearance = {
 
 export const metadata: Metadata = {
   title: "SOM Network Navigator",
-  description: "Navigate the SOM network, one coffee chat at a time."
+  description: "Navigate the SOM network and draft personalized outreach."
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <SignedIn>
                   <nav className="site-nav">
                     <Link href="/">Home</Link>
-                    <Link href="/chat">Chat</Link>
+                    <Link href="/workspace">Workspace</Link>
                     <Link href="/account/profile-document">Profile doc</Link>
                   </nav>
                   <UserButton />

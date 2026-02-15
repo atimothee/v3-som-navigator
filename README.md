@@ -31,7 +31,7 @@ cp .env.local.example .env.local  # create a local file if you have a template
 | `PINECONE_API_KEY` | Pinecone API key for accessing the configured vector index. |
 | `PINECONE_INDEX` | The name of the Pinecone index storing alum profile vectors. |
 | `PINECONE_NAMESPACE` | Namespace used by the cleanup scripts (`delete:pinecone:all`). |
-| `EXA_API_KEY` | Exa API key used by Super Search (LinkedIn profile discovery). |
+| `EXA_API_KEY` | Exa API key used by People Finder (LinkedIn profile discovery). |
 | `NEXT_PUBLIC_SEGMENT_WRITE_KEY` | Segment write key for client-side analytics instrumentation. |
 
 If you use Clerk or other providers, add their keys as needed. Vercel resolves `.env.local` for preview/deploy environments, so mirror the same keys in the project settings.
@@ -62,10 +62,10 @@ Vercel automatically runs `npm run build` before deploying; ensure your `.env` k
 
 1. Start the dev server with `npm run dev`.
 2. Open `http://localhost:3000` and authenticate if prompted (Clerk manages auth).
-3. Ask a question in the chat window; the system queries Pinecone (and falls back to EXA when needed) to gather alum profiles, then streams a concise networking response.
+3. Open the workspace and describe who you want to meet; the system queries Pinecone (and falls back to EXA when needed) to gather alum profiles, then helps draft/refine outreach.
 4. Confirm the console logs mention vector retrieval and optionally run `npm run lint` or the ingest/delete scripts (`npm run ingest:pinecone`) to validate data pipeline scripts.
 
-If you’re validating deployment, trigger a preview on Vercel and repeat the chat flow to ensure the `OPENAI_API_KEY` and Pinecone keys work in that environment as well.
+If you’re validating deployment, trigger a preview on Vercel and repeat the workspace flow to ensure the `OPENAI_API_KEY` and Pinecone keys work in that environment as well.
 
 ## EXA profile ingestion Colab
 

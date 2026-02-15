@@ -124,9 +124,9 @@ export function ProfileDocumentManager({ mode = "account" }: Props) {
   return (
     <Card className="glass" size="4">
       <Flex direction="column" gap="3">
-        <Heading size="6">Resume or LinkedIn PDF</Heading>
+        <Heading size="6">Personalization Document</Heading>
         <Text size="2" color="gray">
-          Upload a resume PDF or a LinkedIn profile PDF export. We use it to personalize outreach openers around likely common ground.
+          Upload a resume PDF or LinkedIn profile PDF export so outreach drafts can reflect your background and likely common ground.
         </Text>
 
         {isLoading ? <Text size="2" color="gray">Loading status...</Text> : null}
@@ -188,10 +188,10 @@ export function ProfileDocumentManager({ mode = "account" }: Props) {
         {mode === "onboarding" ? (
           <Flex gap="2" wrap="wrap" mt="2">
             <Button asChild>
-              <Link href="/chat">Continue to chat</Link>
+              <Link href="/workspace">Continue to workspace</Link>
             </Button>
             <Button asChild variant="soft" color="gray">
-              <Link href="/chat">Skip for now</Link>
+              <Link href="/workspace">Skip for now</Link>
             </Button>
           </Flex>
         ) : null}
