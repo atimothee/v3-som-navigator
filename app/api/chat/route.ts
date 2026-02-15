@@ -27,8 +27,7 @@ function isOpenerRequest(input: string) {
   return (
     normalized.includes("draft opener") ||
     normalized.includes("linkedin dm opener") ||
-    normalized.includes("resume-to-linkedin opener") ||
-    normalized.includes("15-20 minute chat")
+    normalized.includes("resume-to-linkedin opener")
   );
 }
 
@@ -159,7 +158,7 @@ export async function POST(req: NextRequest) {
   const context =
     contextMatches.length
       ? contextMatches.map(({ profile }) => formatProfile(profile)).join("\n\n")
-      : "No specific context matched; offer general networking guidance for SOM coffee chats.";
+      : "No specific context matched; offer general SOM networking guidance.";
   const openerTargetContext =
     explicitTargetContext ?? (contextMatches[0] ? formatProfile(contextMatches[0].profile) : "Not available.");
   const similaritySignals = openerMode
@@ -191,7 +190,7 @@ export async function POST(req: NextRequest) {
     "- Personalized hook referencing a specific detail from the target background.\n" +
     "- One line of sender context.\n" +
     "- Specific overlap or reason for reaching out.\n" +
-    "- Lightweight ask for a 15-20 minute chat.\n\n" +
+    "- Lightweight ask for a short follow-up conversation.\n\n" +
     "Specificity requirements:\n" +
     "- Use at least 2 concrete details from target context (for example company, school, title, geography, transition).\n" +
     "- Use at least 1 concrete sender detail from resume context when available.\n" +
@@ -213,13 +212,13 @@ export async function POST(req: NextRequest) {
     `Target anchors:\n${similaritySignals.targetAnchors.join(", ") || "None"}\n` +
     `Model-derived evidence:\n${similaritySignals.evidence.join(" | ") || "None"}`;
   const defaultSystem =
-    "You are the SOM Network Navigator, a warm guide for connecting Yale SOM students and alumni for coffee chats.\n" +
+    "You are the SOM Network Navigator, a warm guide for connecting Yale SOM students and alumni.\n" +
     "Use the provided alum context to recommend 5-10 specific people with reasons.\n" +
     "Be concise, prefer short bullets, include link to Linkedin profile + location hints, and add a brief outreach opener when asked.\n" +
     `${profileInstruction}\n\n` +
     "Strict rules:" +
     "\n- Only recommend people from the provided alum context." +
-    "\n- If no relevant alum context is provided, give general advice on how to approach coffee chats." +
+    "\n- If no relevant alum context is provided, give general advice on networking outreach." +
     "\n- Always maintain a friendly and encouraging tone." +
     "\n- Do not fabricate information about alumni.\n" +
     `Alum context:\n${context}`;

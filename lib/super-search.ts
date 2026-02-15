@@ -9,7 +9,6 @@ export type SuperSearchResult = {
   location: string;
   interests: string[];
   summary: string;
-  availability: string;
   linkedinUrl: string;
   snippet: string;
   description: string;
@@ -124,7 +123,6 @@ async function searchWithExa(
         location: inferredLocation || "Unknown",
         interests,
         summary,
-        availability: "Availability not provided",
         linkedinUrl,
         snippet: trimSnippet(textSnippet),
         description: normalizeLongText(description),

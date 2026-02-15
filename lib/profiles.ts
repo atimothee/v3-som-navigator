@@ -9,7 +9,6 @@ export type Profile = {
   location: string;
   interests: string[];
   summary: string;
-  availability: string;
   linkedinUrl?: string;
   publishedDate?: string;
 };
@@ -38,7 +37,6 @@ export function profileToText(profile: Profile) {
   return [
     `${profile.name} | ${profile.title} | ${profile.gradYear} | ${profile.location}`,
     `Interests: ${profile.interests.join(", ")}`,
-    `Availability: ${profile.availability}`,
     `LinkedIn: ${profile.linkedinUrl ?? "Not provided"}`,
     `Summary: ${profile.summary}`
   ].join("\n");
@@ -56,7 +54,6 @@ export function normalizeProfile(input: any): Profile | null {
   const location = input.location ?? input.city ?? input.region ?? input.country ?? "Unknown";
   const interests = normalizeInterests(input.interests ?? input.tags ?? input.keywords);
   const summary = (input.summary ?? input.bio ?? input.description ?? "").toString().trim();
-  const availability = input.availability ?? input.slots ?? "Availability not provided";
   const linkedinUrl = normalizeLinkedinUrl(input);
   const publishedDate = toOptionalString(input.publishedDate);
 
@@ -70,7 +67,6 @@ export function normalizeProfile(input: any): Profile | null {
     location: String(location),
     interests,
     summary: String(summary),
-    availability: String(availability),
     linkedinUrl: linkedinUrl || undefined,
     publishedDate: publishedDate || undefined
   };
