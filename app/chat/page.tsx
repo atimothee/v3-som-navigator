@@ -1,16 +1,24 @@
-import { ChatPanel } from "@/components/chat-panel";
+import { SearchChatWorkspace } from "@/components/search-chat-workspace";
+import { loadProfilesFromDocs } from "@/lib/profiles";
 import { requireYaleUser } from "@/lib/require-yale-user";
-import { LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
-import { Badge, Box, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
-
-const perks = [
-  { icon: <LightningBoltIcon />, title: "Fast matches", body: "RAG-powered picks across roles, regions, and vibes." },
-  { icon: <MixerVerticalIcon />, title: "Context aware", body: "LangChain retrieves alum clues and availability for you." },
-  { icon: <RocketIcon />, title: "Outreach ready", body: "Get a short opener you can paste into email or LinkedIn." }
-];
+import { Badge, Container, Flex, Heading, Text } from "@radix-ui/themes";
 
 export default async function ChatPage() {
   await requireYaleUser();
+
+  const profiles = loadProfilesFromDocs().map((profile, index) => ({
+    id: profile.id ?? profile.linkedinUrl ?? `${profile.name}-${profile.title}-${index}`,
+    name: profile.name,
+    title: profile.title,
+    gradYear: profile.gradYear,
+    location: profile.location,
+    interests: profile.interests,
+    summary: profile.summary,
+    availability: profile.availability,
+    linkedinUrl: profile.linkedinUrl,
+    publishedDate: profile.publishedDate
+  }));
+
   return (
     <div className="chat-page">
       <Container size="4" px={{ initial: "3", md: "6" }} py="7">
@@ -20,36 +28,14 @@ export default async function ChatPage() {
               Beta Version
             </Badge>
             <Heading size="8" align="center" className="chat-title">
-              Talk to the SOM Navigator
+              Search and Talk to the SOM Navigator
             </Heading>
             <Text size="4" color="gray" align="center" style={{ maxWidth: "780px" }}>
-              Find the right alum to contact, copy an opener, and prep your coffee chat in minutes.
+              Find relevant alumni with filters, then draft personalized outreach in chat.
             </Text>
           </Flex>
 
-          <Box className="chat-spotlight">
-            <Box className="chat-panel-wrap">
-              <ChatPanel className="chat-panel-wide" placeholder="Who can help me explore climate finance roles in NYC?" />
-            </Box>
-          </Box>
-
-          <Separator size="4" />
-
-          <Box className="context-strip">
-            <Grid columns={{ initial: "1", md: "3" }} gap="3">
-              {perks.map((perk) => (
-                <Flex key={perk.title} align="center" gap="2">
-                  <span className="context-icon">{perk.icon}</span>
-                  <Text size="2" weight="bold">
-                    {perk.title}
-                  </Text>
-                  <Text size="2" color="gray">
-                    {perk.body}
-                  </Text>
-                </Flex>
-              ))}
-            </Grid>
-          </Box>
+          <SearchChatWorkspace profiles={profiles} />
         </Flex>
       </Container>
     </div>
