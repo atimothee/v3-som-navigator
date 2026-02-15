@@ -10,9 +10,9 @@ const stats = [
     detail: "Generate opener text grounded in your resume or LinkedIn PDF."
   },
   {
-    label: "AI architecture",
-    value: "Built with RAG pipeline",
-    detail: "LangChain orchestration + Pinecone vector retrieval + OpenAI generation."
+    label: "Modern GenAI Stack",
+    value: "Effortless AI assistance",
+    detail: "Grounded LLM workflows surface the right alumni faster and generate high-quality outreach drafts that are ready to send."
   }
 ];
 
@@ -82,7 +82,7 @@ export default async function Page() {
                 </Heading>
                 <Grid columns={{ initial: "1", md: "3" }} gap="4">
                   <Step title="1. Describe target alumni" body="Use plain language: role, industry, geography, and outreach goal." />
-                  <Step title="2. Retrieve with RAG" body="LangChain routes your query through embeddings and Pinecone vector search to ground results." />
+                  <Step title="2. Retrieve signal with RAG" body="Embed each query, retrieve high-signal context from a vector database, and ground LLM outputs in that evidence." />
                   <Step title="3. Draft personalized outreach" body="Generate a concise opener tailored to your background and the selected profile." />
                 </Grid>
               </Container>
