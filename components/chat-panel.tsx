@@ -137,9 +137,9 @@ export function ChatPanel({
     <Card className={clsx("glass", "chat-shell", expanded && "chat-shell-expanded", className)} size="4">
       <Flex justify="between" align="center" mb="4">
         <div>
-          <Text weight="bold">Try the navigator</Text>
+          <Text weight="bold">Chat Mode</Text>
           <Text as="p" size="2" color="gray">
-            Ask for a match, a warm intro script, or availability.
+            Refine outreach, ask for follow-ups, and tailor tone.
           </Text>
         </div>
         {isLoading ? <div className="pulse" aria-label="model typing" /> : null}
@@ -149,7 +149,7 @@ export function ChatPanel({
         {messages.length === 0 ? (
           <Card variant="surface" className="message assistant" mb="3">
             <Text size="2" color="gray">
-              Ready to map your next SOM coffee chat. Ask anything: roles, regions, or how to phrase the outreach.
+              Pick a match and we&apos;ll help you write a concise, personalized outreach note.
             </Text>
           </Card>
         ) : (
@@ -210,7 +210,7 @@ export function ChatPanel({
         </Flex>
 
         <Text as="p" size="1" color="gray" mt="2">
-          Tip: Add details and context. Navigator won&apos;t remember your last question.
+          Tip: Add your goal, shared interests, and preferred ask. Context resets each new question.
         </Text>
         <Text as="p" size="1" color="gray" mt="2">
           Found issue?{" "}
