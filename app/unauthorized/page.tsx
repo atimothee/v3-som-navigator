@@ -1,4 +1,5 @@
-import { Container, Heading, Text } from "@radix-ui/themes";
+import { Button, Container, Flex, Heading, Text } from "@radix-ui/themes";
+import { SignOutButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
 
 export default function UnauthorizedPage() {
@@ -10,7 +11,18 @@ export default function UnauthorizedPage() {
       <Text as="p" size="4" color="gray" mb="4">
         Please sign in with your Yale email address to use the SOM Network Navigator.
       </Text>
-      <Link href="/sign-in">Go to sign in</Link>
+      <Flex gap="3" wrap="wrap">
+        <SignedIn>
+          <SignOutButton redirectUrl="/sign-in">
+            <Button>Sign out and sign in again</Button>
+          </SignOutButton>
+        </SignedIn>
+        <SignedOut>
+          <Button asChild variant="soft">
+            <Link href="/sign-in">Go to sign in</Link>
+          </Button>
+        </SignedOut>
+      </Flex>
     </Container>
   );
 }
