@@ -245,7 +245,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
             <span>Who do you want to meet?</span>
             <input
               type="text"
-              placeholder="Examples: SOM alumni in climate tech in NYC; private equity in SF; AI product leadership in Seattle; consulting to operating roles"
+              placeholder="Examples: Yale SOM alums in healthcare; AI Product Managers in Seattle; VC in San Francisco"
               value={superQuery}
               onChange={(event) => setSuperQuery(event.target.value)}
             />
@@ -268,7 +268,9 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
 
           {superResults.length > 0 ? (
             <div className="super-results" aria-live="polite">
-              {superResults.map((result) => (
+              {superResults.map((result) => {
+                const displayLocation = formatResultLocation(result.location);
+                return (
                 <Card key={result.id} className="profile-card" variant="surface">
                   <Flex align="center" gap="3" mb="3">
                     <div className="profile-avatar" aria-hidden>
@@ -281,9 +283,11 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                       <Text as="p" size="2" color="gray">
                         {result.title}
                       </Text>
-                      <Text as="p" size="2" color="gray">
-                        {formatResultLocation(result.location)}
-                      </Text>
+                      {displayLocation ? (
+                        <Text as="p" size="2" color="gray">
+                          {displayLocation}
+                        </Text>
+                      ) : null}
                     </div>
                   </Flex>
 
@@ -358,7 +362,8 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                     </Card>
                   ) : null}
                 </Card>
-              ))}
+                );
+              })}
             </div>
           ) : null}
         </div>
@@ -388,10 +393,10 @@ function getInitials(name: string): string {
     .join("");
 }
 
-function formatResultLocation(location: string): string {
+function formatResultLocation(location: string): string | null {
   const normalizedLocation = location.trim();
   if (!normalizedLocation || normalizedLocation.toLowerCase() === "unknown") {
-    return "Location Unknown";
+    return null;
   }
   return normalizedLocation;
 }
