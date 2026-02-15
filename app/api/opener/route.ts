@@ -3,6 +3,7 @@ import { generateText } from "ai";
 import { currentUser } from "@clerk/nextjs/server";
 import { isAuthorizedYaleUser } from "@/lib/require-yale-user";
 import { resolveStoredProfileDocument } from "@/lib/profile-document";
+import { OPENER_STYLE_GUIDELINES } from "@/lib/opener-instructions";
 import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -71,10 +72,8 @@ export async function POST(req: NextRequest) {
       temperature: 0.25,
       system:
         "You are writing one standalone LinkedIn networking opener. " +
-        "Write 75-120 words in 3-5 sentences. Be specific, direct, and warm. " +
+        `${OPENER_STYLE_GUIDELINES} ` +
         "Use details from the target context and use sender context if available. " +
-        "Include a light ask for a 15-20 minute conversation. " +
-        "Do not use bullets, markdown, emojis, or filler phrases. " +
         "Return only the final opener text.",
       prompt: `Sender context:\n${senderContext}\n\nTarget context:\n${targetContext}`
     });
