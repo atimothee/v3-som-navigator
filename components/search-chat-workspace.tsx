@@ -1,6 +1,7 @@
 "use client";
 
 import { ChatPanel } from "@/components/chat-panel";
+import { trackEvent } from "@/lib/analytics";
 import { Button, Card, Flex, Heading, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -22,9 +23,19 @@ type SuperSearchResult = {
   source: "exa";
 };
 
+type WorkspaceMode = "search" | "chat";
+
+type OpenerState = {
+  loading: boolean;
+  text: string | null;
+  error: string | null;
+};
+
 export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocumentText: boolean }) {
-  const [chatSeed, setChatSeed] = useState<{ text: string; nonce: number } | null>(null);
+  const [activeMode, setActiveMode] = useState<WorkspaceMode>("search");
+  const [chatPrefill, setChatPrefill] = useState<{ text: string; nonce: number } | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+  const [openerByResultId, setOpenerByResultId] = useState<Record<string, OpenerState>>({});
   const [superQuery, setSuperQuery] = useState("");
   const [superSearching, setSuperSearching] = useState(false);
   const [superError, setSuperError] = useState<string | null>(null);
@@ -95,8 +106,112 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
     }
   }
 
+  function switchMode(nextMode: WorkspaceMode) {
+    if (nextMode === activeMode) return;
+    trackEvent("Workspace Mode Switched", { from: activeMode, to: nextMode });
+    setActiveMode(nextMode);
+  }
+
+  async function runOpenerDraft(result: SuperSearchResult) {
+    trackEvent("Opener Draft Requested", { profileId: result.id });
+    setOpenerByResultId((prev) => ({
+      ...prev,
+      [result.id]: {
+        loading: true,
+        text: prev[result.id]?.text ?? null,
+        error: null
+      }
+    }));
+
+    try {
+      const response = await fetch("/api/opener", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          target: {
+            name: result.name,
+            title: result.title,
+            location: result.location,
+            interests: result.interests,
+            summary: result.summary,
+            linkedinUrl: result.linkedinUrl
+          }
+        })
+      });
+      const payload = (await response.json()) as { text?: string; error?: string };
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to generate opener.");
+      }
+      if (!payload.text?.trim()) {
+        throw new Error("No opener returned.");
+      }
+
+      setOpenerByResultId((prev) => ({
+        ...prev,
+        [result.id]: {
+          loading: false,
+          text: payload.text ?? null,
+          error: null
+        }
+      }));
+      trackEvent("Opener Draft Generated", { profileId: result.id });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unable to generate opener.";
+      setOpenerByResultId((prev) => ({
+        ...prev,
+        [result.id]: {
+          loading: false,
+          text: prev[result.id]?.text ?? null,
+          error: message
+        }
+      }));
+    }
+  }
+
+  async function copyOpener(profileId: string, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      trackEvent("Opener Draft Copied", { profileId });
+    } catch {
+      // Ignore clipboard errors silently; user can still copy manually.
+    }
+  }
+
+  function sendOpenerToChat(profileId: string, text: string) {
+    setChatPrefill({ text, nonce: Date.now() });
+    setActiveMode("chat");
+    trackEvent("Opener Sent To Chat", { profileId });
+  }
+
   return (
     <div className="search-chat-shell">
+      <Flex className="workspace-mode-toggle" role="tablist" aria-label="Workspace mode">
+        <Button
+          type="button"
+          role="tab"
+          variant={activeMode === "search" ? "solid" : "soft"}
+          aria-selected={activeMode === "search"}
+          className={activeMode === "search" ? "workspace-mode-button active" : "workspace-mode-button"}
+          onClick={() => switchMode("search")}
+        >
+          Search
+        </Button>
+        <Button
+          type="button"
+          role="tab"
+          variant={activeMode === "chat" ? "solid" : "soft"}
+          aria-selected={activeMode === "chat"}
+          className={activeMode === "chat" ? "workspace-mode-button active" : "workspace-mode-button"}
+          onClick={() => switchMode("chat")}
+        >
+          Chat
+        </Button>
+      </Flex>
+
+      {activeMode === "search" ? (
       <section className="search-pane glass" aria-label="People search">
         <Flex justify="between" align="center" wrap="wrap" gap="3">
           <Heading size="6">Super Search</Heading>
@@ -211,44 +326,56 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                       </Button>
                     ) : null}
 
-                    <Button
-                      variant="soft"
-                      color="gray"
-                      onClick={() =>
-                        setChatSeed({
-                          text:
-                            `Generate one short networking opener for this target.\n` +
-                            `Use my uploaded resume/profile PDF text as sender context if available.\n` +
-                            `Target person:\n` +
-                            `- Name: ${result.name}\n` +
-                            `- Title: ${result.title}\n` +
-                            `- Location: ${result.location}\n` +
-                            `- Interests: ${result.interests.join(", ") || "Not listed"}\n` +
-                            `- Summary: ${result.summary}\n` +
-                            `- Profile URL: ${result.linkedinUrl ?? "Not provided"}\n` +
-                            `Return only the final message.`,
-                          nonce: Date.now()
-                        })
-                      }
-                    >
-                      Draft opener text
+                    <Button variant="soft" color="gray" onClick={() => runOpenerDraft(result)} disabled={openerByResultId[result.id]?.loading}>
+                      {openerByResultId[result.id]?.loading ? "Drafting..." : "Draft opener text"}
                     </Button>
                   </Flex>
+
+                  {openerByResultId[result.id]?.error ? (
+                    <Text as="p" size="2" color="red" mt="3">
+                      {openerByResultId[result.id]?.error}
+                    </Text>
+                  ) : null}
+
+                  {openerByResultId[result.id]?.text ? (
+                    <Card className="opener-result-card" variant="surface" mt="3">
+                      <Text as="p" size="2" weight="bold">
+                        Standalone opener draft
+                      </Text>
+                      <Text as="p" size="2" mt="2">
+                        {openerByResultId[result.id]?.text}
+                      </Text>
+                      <Flex gap="2" mt="3" wrap="wrap">
+                        <Button size="1" variant="soft" onClick={() => copyOpener(result.id, openerByResultId[result.id].text ?? "")}>
+                          Copy
+                        </Button>
+                        <Button size="1" variant="soft" color="gray" onClick={() => runOpenerDraft(result)} disabled={openerByResultId[result.id]?.loading}>
+                          Regenerate
+                        </Button>
+                        <Button size="1" onClick={() => sendOpenerToChat(result.id, openerByResultId[result.id].text ?? "")}>
+                          Use in chat
+                        </Button>
+                      </Flex>
+                    </Card>
+                  ) : null}
                 </Card>
               ))}
             </div>
           ) : null}
         </div>
       </section>
+      ) : null}
 
+      {activeMode === "chat" ? (
       <section className="chat-pane">
         <ChatPanel
           className="chat-panel-wide"
           placeholder="Who can help me explore climate finance roles in NYC?"
-          autoSendText={chatSeed?.text}
-          autoSendNonce={chatSeed?.nonce}
+          prefillText={chatPrefill?.text}
+          prefillNonce={chatPrefill?.nonce}
         />
       </section>
+      ) : null}
     </div>
   );
 }
