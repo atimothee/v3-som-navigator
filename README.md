@@ -1,6 +1,6 @@
 # SOM Network Navigator
 
-This Next.js + TypeScript application (deployed on Vercel) helps Yale SOM students and alumni discover curated coffee-chat matches powered by OpenAI embeddings and Pinecone vectors.
+This Next.js + TypeScript application (deployed on Vercel) helps Yale SOM students and alumni find their next role by surfacing relevant alumni profiles, networking paths, and targeted outreach recommendations powered by OpenAI embeddings and Pinecone vectors.
 
 ## Prerequisites
 
@@ -31,16 +31,10 @@ cp .env.local.example .env.local  # create a local file if you have a template
 | `PINECONE_API_KEY` | Pinecone API key for accessing the configured vector index. |
 | `PINECONE_INDEX` | The name of the Pinecone index storing alum profile vectors. |
 | `PINECONE_NAMESPACE` | Namespace used by the cleanup scripts (`delete:pinecone:all`). |
+| `EXA_API_KEY` | Exa API key used by Super Search (LinkedIn profile discovery). |
 | `NEXT_PUBLIC_SEGMENT_WRITE_KEY` | Segment write key for client-side analytics instrumentation. |
 
 If you use Clerk or other providers, add their keys as needed. Vercel resolves `.env.local` for preview/deploy environments, so mirror the same keys in the project settings.
-
-### Optional environment variables
-
-| Variable | Description |
-| --- | --- |
-| `EXA_API_KEY` | Optional server-side fallback key for Super Search (LinkedIn profile discovery via Exa). Users can also provide keys in-app. |
-| `PARALLEL_API_KEY` | Optional server-side fallback key for Super Search (LinkedIn profile discovery via Parallel.ai). Users can also provide keys in-app. |
 
 ## Running the Application
 
