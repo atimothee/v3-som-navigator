@@ -1,5 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { convertToCoreMessages, streamText } from "ai";
+import { isAuthorizedYaleUser } from "@/lib/require-yale-user";
 import { NextRequest } from "next/server";
 import { formatProfile, retrieveProfiles } from "@/lib/rag";
 
@@ -10,6 +11,12 @@ const PROFILE_DISPLAY_MIN = 7;
 const PROFILE_DISPLAY_MAX = 10;
 
 export async function POST(req: NextRequest) {
+  const authorized = await isAuthorizedYaleUser();
+
+  if (!authorized) {
+    return new Response("Forbidden", { status: 403 });
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     return new Response("Missing OPENAI_API_KEY", { status: 500 });
   }

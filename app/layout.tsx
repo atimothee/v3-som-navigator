@@ -9,7 +9,6 @@ import {
   SignedIn,
   SignedOut,
   SignInButton,
-  SignUpButton,
   UserButton
 } from "@clerk/nextjs";
 import type { Metadata } from "next";
@@ -22,6 +21,20 @@ const font = Space_Grotesk({
   display: "swap"
 });
 
+const clerkAppearance = {
+  elements: {
+    socialButtonsRoot: {
+      display: "none"
+    },
+    socialButtons: {
+      display: "none"
+    },
+    dividerRow: {
+      display: "none"
+    }
+  }
+};
+
 export const metadata: Metadata = {
   title: "SOM Network Navigator",
   description: "Navigate the SOM network, one coffee chat at a time."
@@ -29,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider appearance={clerkAppearance}>
       <html lang="en" className={font.className}>
         <body>
           <Theme appearance="dark" accentColor="indigo" grayColor="sand">
@@ -41,7 +54,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <header className="site-header">
                 <SignedOut>
                   <SignInButton mode="modal" />
-                  <SignUpButton mode="modal" />
                 </SignedOut>
                 <SignedIn>
                   <UserButton />

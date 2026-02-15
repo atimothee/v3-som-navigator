@@ -1,3 +1,4 @@
+import { requireYaleUser } from "@/lib/require-yale-user";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Inset, Separator, Text } from "@radix-ui/themes";
 import Link from "next/link";
 
@@ -15,7 +16,8 @@ const stats = [
   }
 ];
 
-export default function Page() {
+export default async function Page() {
+  await requireYaleUser();
   return (
     <div className="home-page">
       <Container size="4" px="6" py="7">

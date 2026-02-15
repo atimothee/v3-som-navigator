@@ -1,4 +1,5 @@
 import { ChatPanel } from "@/components/chat-panel";
+import { requireYaleUser } from "@/lib/require-yale-user";
 import { LightningBoltIcon, MixerVerticalIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Badge, Box, Container, Flex, Grid, Heading, Separator, Text } from "@radix-ui/themes";
 
@@ -8,7 +9,8 @@ const perks = [
   { icon: <RocketIcon />, title: "Outreach ready", body: "Get a short opener you can paste into email or LinkedIn." }
 ];
 
-export default function ChatPage() {
+export default async function ChatPage() {
+  await requireYaleUser();
   return (
     <div className="chat-page">
       <Container size="4" px={{ initial: "3", md: "6" }} py="7">
