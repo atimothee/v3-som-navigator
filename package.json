@@ -24,12 +24,14 @@
     "clsx": "^2.1.1",
     "langchain": "^0.2.7",
     "next": "14.2.25",
+    "pdf-parse": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
+    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.22",
     "dotenv": "^17.2.3",

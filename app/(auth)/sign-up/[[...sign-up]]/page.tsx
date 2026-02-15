@@ -7,7 +7,7 @@ export default function SignUpPage() {
       <Heading size="7" mb="4">
         Create your account
       </Heading>
-      <SignUp />
+      <SignUp forceRedirectUrl="/onboarding/profile-document" fallbackRedirectUrl="/onboarding/profile-document" />
     </Container>
   );
 }

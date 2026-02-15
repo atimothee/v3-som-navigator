@@ -58,6 +58,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <SignInButton mode="modal" />
                 </SignedOut>
                 <SignedIn>
+                  <nav className="site-nav">
+                    <Link href="/">Home</Link>
+                    <Link href="/chat">Chat</Link>
+                    <Link href="/account/profile-document">Profile doc</Link>
+                  </nav>
                   <UserButton />
                 </SignedIn>
               </header>
