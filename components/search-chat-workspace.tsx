@@ -313,10 +313,6 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                     </Button>
                   ) : null}
 
-                  <Text as="p" size="1" color="gray" mt="1">
-                    via: Web search
-                  </Text>
-
                   <Flex gap="2" mt="4" wrap="wrap">
                     {result.linkedinUrl ? (
                       <Button asChild>
