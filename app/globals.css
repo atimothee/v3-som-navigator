@@ -387,20 +387,36 @@ a {
 }
 
 .search-chat-shell {
-  display: grid;
-  grid-template-columns: minmax(320px, 1.2fr) minmax(320px, 1fr);
-  gap: 16px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
 }
 
 .search-pane {
+  width: 100%;
   padding: 16px;
   border-radius: 18px;
 }
 
 .chat-pane {
-  position: sticky;
-  top: 16px;
+  width: 100%;
+}
+
+.workspace-mode-toggle {
+  padding: 4px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  gap: 6px;
+}
+
+.workspace-mode-button {
+  border-radius: 999px;
+}
+
+.workspace-mode-button.active {
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
 }
 
 .search-controls {
@@ -548,6 +564,11 @@ a {
   gap: 12px;
 }
 
+.opener-result-card {
+  border: 1px solid rgba(124, 248, 200, 0.28);
+  background: linear-gradient(135deg, rgba(124, 248, 200, 0.08), rgba(111, 90, 237, 0.08));
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(124, 248, 200, 0.45);
@@ -595,14 +616,6 @@ a {
 }
 
 @media (max-width: 1080px) {
-  .search-chat-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .chat-pane {
-    position: static;
-  }
-
   .profile-grid {
     max-height: none;
   }
