@@ -17,9 +17,9 @@ type Props = {
 };
 
 const prompts = [
-  "Tighten this opener to sound warm, concise, and specific to their background.",
-  "Give me 3 variants: confident, friendly, and low-pressure.",
-  "Rewrite this note with a clearer outreach ask."
+  "Write a 90-word opener to a Yale SOM alum in climate fintech, with a low-pressure ask.",
+  "Make this opener warmer and less generic, while staying concise.",
+  "Give me 3 versions of this opener: formal, friendly, and concise."
 ];
 
 export function ChatPanel({
@@ -139,7 +139,7 @@ export function ChatPanel({
         <div>
           <Text weight="bold">Draft Message</Text>
           <Text as="p" size="2" color="gray">
-            Refine outreach, tune tone, and generate stronger follow-ups.
+            Draft and refine cold outreach openers, variants, and follow-ups.
           </Text>
         </div>
         {isLoading ? <div className="pulse" aria-label="model typing" /> : null}
@@ -149,7 +149,7 @@ export function ChatPanel({
         {messages.length === 0 ? (
           <Card variant="surface" className="message assistant" mb="3">
             <Text size="2" color="gray">
-              Pick a match, generate a first draft, then use this space to refine it before you send.
+              Start with your outreach goal. If needed, ask for people suggestions and then draft against a target.
             </Text>
           </Card>
         ) : (
@@ -210,7 +210,7 @@ export function ChatPanel({
         </Flex>
 
         <Text as="p" size="1" color="gray" mt="2">
-          Tip: Add your goal, shared interests, and preferred ask. Context resets each new question.
+          Tip: Include target context, your shared overlap, and preferred tone for better drafts.
         </Text>
       </form>
 
