@@ -21,7 +21,7 @@ export default async function ChatPage() {
               Search and Talk to the SOM Navigator
             </Heading>
             <Text size="4" color="gray" align="center" style={{ maxWidth: "780px" }}>
-              Run natural-language LinkedIn Super Search, then draft personalized outreach in chat.
+              Run natural-language Super Search, then draft personalized outreach in chat.
             </Text>
           </Flex>
 

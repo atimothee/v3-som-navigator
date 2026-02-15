@@ -5,7 +5,6 @@ import { Button, Card, Flex, Heading, Text } from "@radix-ui/themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-type SuperSearchProvider = "exa" | "parallel";
 type SuperSearchResult = {
   id: string;
   name: string;
@@ -20,14 +19,12 @@ type SuperSearchResult = {
   snippet: string;
   description: string;
   oneLiner: string;
-  source: SuperSearchProvider;
+  source: "exa";
 };
 
 export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocumentText: boolean }) {
   const [chatSeed, setChatSeed] = useState<{ text: string; nonce: number } | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
-  const [superProvider, setSuperProvider] = useState<SuperSearchProvider>("exa");
-  const [superApiKey, setSuperApiKey] = useState("");
   const [superQuery, setSuperQuery] = useState("");
   const [superSearching, setSuperSearching] = useState(false);
   const [superError, setSuperError] = useState<string | null>(null);
@@ -35,39 +32,18 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const provider = window.localStorage.getItem("super-search-provider");
-    const exaKey = window.localStorage.getItem("super-search-exa-key");
-    const parallelKey = window.localStorage.getItem("super-search-parallel-key");
 
-    if (provider === "parallel" || provider === "exa") {
-      setSuperProvider(provider);
-      setSuperApiKey(provider === "parallel" ? parallelKey ?? "" : exaKey ?? "");
-      return;
-    }
-
-    if (exaKey) {
-      setSuperApiKey(exaKey);
-    }
+    window.localStorage.removeItem("super-search-provider");
+    window.localStorage.removeItem("super-search-parallel-key");
+    window.localStorage.removeItem("super-search-exa-key");
+    window.localStorage.removeItem("super-search-yale-only");
+    window.localStorage.removeItem("super-search-yale-som-only");
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("super-search-provider", superProvider);
-    const savedKey =
-      superProvider === "parallel"
-        ? window.localStorage.getItem("super-search-parallel-key")
-        : window.localStorage.getItem("super-search-exa-key");
-    setSuperApiKey(savedKey ?? "");
-  }, [superProvider]);
 
   async function runSuperSearch() {
     const normalizedQuery = superQuery.trim();
     if (!normalizedQuery) {
       setSuperError("Enter a natural-language search query.");
-      return;
-    }
-    if (!superApiKey.trim()) {
-      setSuperError(`Add your ${superProvider === "exa" ? "Exa" : "Parallel.ai"} API key first.`);
       return;
     }
 
@@ -84,8 +60,6 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
         },
         body: JSON.stringify({
           query: normalizedQuery,
-          provider: superProvider,
-          apiKey: superApiKey.trim(),
           maxResults: 10
         })
       });
@@ -111,7 +85,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
       const results = Array.isArray(payload.results) ? payload.results : [];
       setSuperResults(results);
       if (results.length === 0) {
-        setSuperError("No LinkedIn profile matches returned for this query.");
+        setSuperError("No Yale SOM alumni profile matches returned for this query.");
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Super search failed.";
@@ -119,12 +93,6 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
     } finally {
       setSuperSearching(false);
     }
-  }
-
-  function saveSuperSearchKey() {
-    if (typeof window === "undefined") return;
-    const storageKey = superProvider === "exa" ? "super-search-exa-key" : "super-search-parallel-key";
-    window.localStorage.setItem(storageKey, superApiKey.trim());
   }
 
   return (
@@ -138,7 +106,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                 "Personalized opener mode is on"
               ) : (
                 <>
-                  Upload resume/LinkedIn PDF with extractable text for personalization.{" "}
+                  Upload your resume or profile PDF with extractable text for personalization.{" "}
                   <Link href="/account/profile-document" style={{ textDecoration: "underline" }}>
                     Add now
                   </Link>
@@ -151,39 +119,15 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
         <div className="super-search-panel">
           <Flex justify="between" align="center" wrap="wrap" gap="2" mb="2">
             <Text as="p" size="4" weight="bold">
-              Super Search (Web LinkedIn)
+              Super Search
             </Text>
             <Text size="1" color="gray">
-              Uses your own Exa or Parallel.ai key
+              Powered by web search
             </Text>
           </Flex>
 
-          <div className="super-search-controls">
-            <label className="search-field">
-              <span>Provider</span>
-              <select value={superProvider} onChange={(event) => setSuperProvider(event.target.value as SuperSearchProvider)}>
-                <option value="exa">Exa</option>
-                <option value="parallel">Parallel.ai</option>
-              </select>
-            </label>
-
-            <label className="search-field">
-              <span>API key</span>
-              <input
-                type="password"
-                placeholder={superProvider === "exa" ? "Enter Exa API key" : "Enter Parallel.ai API key"}
-                value={superApiKey}
-                onChange={(event) => setSuperApiKey(event.target.value)}
-              />
-            </label>
-
-            <Button type="button" variant="soft" color="gray" onClick={saveSuperSearchKey}>
-              Save key
-            </Button>
-          </div>
-
           <label className="search-field">
-            <span>Natural-language LinkedIn search</span>
+            <span>Natural-language people search</span>
             <input
               type="text"
               placeholder="Example: Yale SOM alumni in climate fintech in NYC open to coffee chats"
@@ -197,7 +141,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
               {superSearching ? "Searching..." : "Run super search"}
             </Button>
             <Text size="1" color="gray">
-              Key is stored locally in your browser only.
+              No user API key entry required.
             </Text>
           </Flex>
 
@@ -255,7 +199,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                   ) : null}
 
                   <Text as="p" size="1" color="gray" mt="1">
-                    via: {result.source === "exa" ? "Exa" : "Parallel.ai"}
+                    via: Web search
                   </Text>
 
                   <Flex gap="2" mt="4" wrap="wrap">
@@ -273,16 +217,16 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                       onClick={() =>
                         setChatSeed({
                           text:
-                            `Generate one LinkedIn DM opener for this target using resume-to-LinkedIn opener mode.\n` +
-                            `Use my uploaded resume/LinkedIn PDF text as sender context if available.\n` +
+                            `Generate one short networking opener for this target.\n` +
+                            `Use my uploaded resume/profile PDF text as sender context if available.\n` +
                             `Target person:\n` +
                             `- Name: ${result.name}\n` +
                             `- Title: ${result.title}\n` +
                             `- Location: ${result.location}\n` +
                             `- Interests: ${result.interests.join(", ") || "Not listed"}\n` +
                             `- Summary: ${result.summary}\n` +
-                            `- LinkedIn: ${result.linkedinUrl ?? "Not provided"}\n` +
-                            `Return only the final LinkedIn DM message.`,
+                            `- Profile URL: ${result.linkedinUrl ?? "Not provided"}\n` +
+                            `Return only the final message.`,
                           nonce: Date.now()
                         })
                       }
