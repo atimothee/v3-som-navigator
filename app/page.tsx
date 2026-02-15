@@ -32,6 +32,14 @@ export default async function Page() {
               <Text size="4" color="gray">
                 Search the SOM network in plain English, then generate personalized outreach in minutes.
               </Text>
+              <Box className="home-access-note" mt="3">
+                <Text as="p" size="1" className="home-access-label">
+                  Access
+                </Text>
+                <Text as="p" size="2" className="home-access-text">
+                  Available only to people with @yale.edu email addresses.
+                </Text>
+              </Box>
 
               <Flex gap="3" mt="4" wrap="wrap">
                 <SignedIn>
