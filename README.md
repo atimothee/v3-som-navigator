@@ -35,6 +35,13 @@ cp .env.local.example .env.local  # create a local file if you have a template
 
 If you use Clerk or other providers, add their keys as needed. Vercel resolves `.env.local` for preview/deploy environments, so mirror the same keys in the project settings.
 
+### Optional environment variables
+
+| Variable | Description |
+| --- | --- |
+| `EXA_API_KEY` | Optional server-side fallback key for Super Search (LinkedIn profile discovery via Exa). Users can also provide keys in-app. |
+| `PARALLEL_API_KEY` | Optional server-side fallback key for Super Search (LinkedIn profile discovery via Parallel.ai). Users can also provide keys in-app. |
+
 ## Running the Application
 
 - Development server (hot reload on `http://localhost:3000`):

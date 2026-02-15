@@ -10,16 +10,27 @@ import ReactMarkdown from "react-markdown";
 type Props = {
   placeholder?: string;
   className?: string;
+  prefillText?: string;
+  prefillNonce?: number;
+  autoSendText?: string;
+  autoSendNonce?: number;
 };
 
 const prompts = [
   "Who can help me with a climate finance internship in NYC?",
-  "I'm exploring product management in New York City—who should I meet?",
+  "I'm exploring product management in New York City-who should I meet?",
   "Looking for alum advice on launching a B2B SaaS pilot."
 ];
 
-export function ChatPanel({ placeholder, className }: Props) {
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setInput } = useChat({
+export function ChatPanel({
+  placeholder,
+  className,
+  prefillText,
+  prefillNonce,
+  autoSendText,
+  autoSendNonce
+}: Props) {
+  const { messages, input, handleInputChange, handleSubmit, isLoading, setInput, append } = useChat({
     api: "/api/chat"
   });
   const [expanded, setExpanded] = useState(false);
@@ -28,12 +39,40 @@ export function ChatPanel({ placeholder, className }: Props) {
   const [isDesktop, setIsDesktop] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const prevMessageCountRef = useRef(0);
+  const lastAutoSendNonceRef = useRef<number | null>(null);
 
   const scrollToBottom = () => {
     const node = scrollRef.current;
     if (!node) return;
     node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    if (!prefillText || !prefillNonce) return;
+    setInput(prefillText);
+    setExpanded(true);
+  }, [prefillNonce, prefillText, setInput]);
+
+  useEffect(() => {
+    if (!autoSendText || !autoSendNonce) return;
+    if (lastAutoSendNonceRef.current === autoSendNonce) return;
+    if (isLoading) return;
+
+    lastAutoSendNonceRef.current = autoSendNonce;
+    setExpanded(true);
+    setShowNewReply(false);
+    setInput("");
+
+    trackEvent("Chat Query Submitted", {
+      prompt: autoSendText,
+      messageCount: messages.length + 1
+    });
+
+    void append({
+      role: "user",
+      content: autoSendText
+    });
+  }, [append, autoSendNonce, autoSendText, isLoading, messages.length, setInput]);
 
   useEffect(() => {
     const node = scrollRef.current;
@@ -127,7 +166,6 @@ export function ChatPanel({ placeholder, className }: Props) {
           className="chat-textarea"
           onFocus={() => setExpanded(true)}
           onBlur={() => {
-            // Collapse only when the field is empty to mirror chat-sdk UX.
             if (!input.trim()) {
               setExpanded(false);
             }
@@ -161,7 +199,7 @@ export function ChatPanel({ placeholder, className }: Props) {
               <span className="inline-loading">
                 <span className="spinner" aria-hidden />
                 <Text size="1" color="gray">
-                  Generating…
+                  Generating...
                 </Text>
               </span>
             ) : null}
@@ -186,7 +224,7 @@ export function ChatPanel({ placeholder, className }: Props) {
       {isLoading && isDesktop ? (
         <div className="floating-pill loading-pill" role="status" aria-live="polite">
           <span className="spinner" aria-hidden />
-          <Text size="1">Assistant responding…</Text>
+          <Text size="1">Assistant responding...</Text>
         </div>
       ) : null}
 
@@ -200,7 +238,7 @@ export function ChatPanel({ placeholder, className }: Props) {
             setShowNewReply(false);
           }}
         >
-          New reply • Jump to latest
+          New reply - Jump to latest
         </Button>
       ) : null}
     </Card>

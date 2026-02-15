@@ -31,8 +31,29 @@ body {
 .site-header {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 10px;
   padding: 12px 18px 4px;
+}
+
+.site-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.site-nav a {
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .page-content {
@@ -365,6 +386,168 @@ a {
   display: inline-flex;
 }
 
+.search-chat-shell {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.2fr) minmax(320px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.search-pane {
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.chat-pane {
+  position: sticky;
+  top: 16px;
+}
+
+.search-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.super-search-panel {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.super-search-controls {
+  display: grid;
+  grid-template-columns: 160px minmax(220px, 1fr) auto;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: end;
+}
+
+.super-results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-sort {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-field span,
+.search-sort span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 600;
+}
+
+.search-field input,
+.search-field select,
+.search-sort select {
+  width: 100%;
+  border: 1px solid var(--stroke);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  font-size: 14px;
+  padding: 10px 12px;
+}
+
+.search-field input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.search-field input:focus-visible,
+.search-field select:focus-visible,
+.search-sort select:focus-visible {
+  outline: 2px solid rgba(124, 248, 200, 0.45);
+  outline-offset: 2px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  max-height: min(72vh, 760px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.profile-card {
+  border: 1px solid var(--stroke);
+}
+
+.profile-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(124, 248, 200, 0.4), rgba(111, 90, 237, 0.8));
+  color: #031114;
+}
+
+.profile-summary {
+  color: rgba(255, 255, 255, 0.84);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.profile-summary-expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: initial;
+  overflow: visible;
+}
+
+.profile-description-toggle {
+  margin-top: 6px;
+  margin-left: 0;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  min-height: 30px;
+  padding: 0 12px;
+  background: linear-gradient(135deg, rgba(124, 248, 200, 0.08), rgba(111, 90, 237, 0.08));
+  color: rgba(255, 255, 255, 0.86);
+  line-height: 1;
+  transition: transform 120ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+
+.profile-description-toggle:hover {
+  transform: translateY(-1px);
+  border-color: rgba(124, 248, 200, 0.35);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.profile-description-toggle:focus-visible {
+  outline: 2px solid rgba(124, 248, 200, 0.45);
+  outline-offset: 2px;
+}
+
+.profile-empty {
+  border: 1px dashed var(--stroke);
+}
+
+.profile-doc-form {
+  display: grid;
+  gap: 12px;
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(124, 248, 200, 0.45);
@@ -387,6 +570,10 @@ a {
 }
 
 @media (max-width: 640px) {
+  .site-nav {
+    display: none;
+  }
+
   .chat-spotlight {
     margin: 0;
     padding: 0;
@@ -404,5 +591,29 @@ a {
 
   .loading-pill {
     display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .search-chat-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .chat-pane {
+    position: static;
+  }
+
+  .profile-grid {
+    max-height: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .search-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .super-search-controls {
+    grid-template-columns: 1fr;
   }
 }

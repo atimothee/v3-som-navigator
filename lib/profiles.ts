@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 export type Profile = {
+  id?: string;
   name: string;
   title: string;
   gradYear: string;
@@ -10,6 +11,7 @@ export type Profile = {
   summary: string;
   availability: string;
   linkedinUrl?: string;
+  publishedDate?: string;
 };
 
 export function loadProfilesFromDocs(): Profile[] {
@@ -45,6 +47,7 @@ export function profileToText(profile: Profile) {
 export function normalizeProfile(input: any): Profile | null {
   if (!input || typeof input !== "object") return null;
 
+  const id = toOptionalString(input.id);
   const name = deriveName(input);
   const rawTitle = input.title ?? input.role ?? input.headline ?? "";
   const cleanedTitle = cleanTitle(String(rawTitle), name);
@@ -55,10 +58,12 @@ export function normalizeProfile(input: any): Profile | null {
   const summary = (input.summary ?? input.bio ?? input.description ?? "").toString().trim();
   const availability = input.availability ?? input.slots ?? "Availability not provided";
   const linkedinUrl = normalizeLinkedinUrl(input);
+  const publishedDate = toOptionalString(input.publishedDate);
 
   if (!name || !title || !summary) return null;
 
   return {
+    id: id || undefined,
     name: String(name),
     title: String(title),
     gradYear: String(gradYear),
@@ -66,7 +71,8 @@ export function normalizeProfile(input: any): Profile | null {
     interests,
     summary: String(summary),
     availability: String(availability),
-    linkedinUrl: linkedinUrl || undefined
+    linkedinUrl: linkedinUrl || undefined,
+    publishedDate: publishedDate || undefined
   };
 }
 
@@ -113,4 +119,10 @@ function normalizeLinkedinUrl(input: any): string | null {
     }
   }
   return null;
+}
+
+function toOptionalString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed || null;
 }
