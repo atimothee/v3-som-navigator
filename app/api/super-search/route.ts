@@ -1,11 +1,9 @@
 import { isAuthorizedYaleUser } from "@/lib/require-yale-user";
-import { superSearchLinkedinProfiles, type SuperSearchProvider } from "@/lib/super-search";
+import { superSearchLinkedinProfiles } from "@/lib/super-search";
 import { NextRequest, NextResponse } from "next/server";
 
 type SuperSearchBody = {
   query?: unknown;
-  provider?: unknown;
-  apiKey?: unknown;
   maxResults?: unknown;
 };
 
@@ -19,36 +17,33 @@ export async function POST(req: NextRequest) {
 
   const body = (await req.json().catch(() => ({}))) as SuperSearchBody;
   const query = typeof body.query === "string" ? body.query.trim() : "";
-  const provider = body.provider === "parallel" ? "parallel" : "exa";
   const maxResults = typeof body.maxResults === "number" ? body.maxResults : 8;
+  const yaleOnly = true;
+  const yaleSomOnly = true;
 
   if (!query) {
     return NextResponse.json({ error: "Query is required." }, { status: 400 });
   }
 
-  const keyFromBody = typeof body.apiKey === "string" ? body.apiKey.trim() : "";
-  const keyFromEnv = provider === "exa" ? process.env.EXA_API_KEY : process.env.PARALLEL_API_KEY;
-  const apiKey = keyFromBody || keyFromEnv || "";
+  const apiKey = process.env.EXA_API_KEY?.trim() || "";
 
   if (!apiKey) {
-    const name = provider === "exa" ? "Exa" : "Parallel.ai";
-    return NextResponse.json(
-      { error: `${name} API key is required. Add one in Super Search settings.` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Search is temporarily unavailable." }, { status: 503 });
   }
 
   try {
     const results = await superSearchLinkedinProfiles({
       query,
-      provider: provider as SuperSearchProvider,
       apiKey,
-      maxResults
+      maxResults,
+      yaleOnly,
+      yaleSomOnly
     });
 
     return NextResponse.json({
-      provider,
       query,
+      yaleOnly,
+      yaleSomOnly,
       count: results.length,
       results
     });

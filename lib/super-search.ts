@@ -1,8 +1,5 @@
 const EXA_SEARCH_ENDPOINT = "https://api.exa.ai/search";
-const PARALLEL_SEARCH_ENDPOINT = "https://api.parallel.ai/v1beta/search";
 const DEFAULT_RESULT_LIMIT = 8;
-
-export type SuperSearchProvider = "exa" | "parallel";
 
 export type SuperSearchResult = {
   id: string;
@@ -18,28 +15,34 @@ export type SuperSearchResult = {
   description: string;
   oneLiner: string;
   publishedDate?: string;
-  source: SuperSearchProvider;
+  source: "exa";
 };
 
 export async function superSearchLinkedinProfiles({
   query,
-  provider,
   apiKey,
-  maxResults = DEFAULT_RESULT_LIMIT
+  maxResults = DEFAULT_RESULT_LIMIT,
+  yaleOnly = false,
+  yaleSomOnly = false
 }: {
   query: string;
-  provider: SuperSearchProvider;
   apiKey: string;
   maxResults?: number;
+  yaleOnly?: boolean;
+  yaleSomOnly?: boolean;
 }): Promise<SuperSearchResult[]> {
-  if (provider === "exa") {
-    return searchWithExa(query, apiKey, maxResults);
-  }
-
-  return searchWithParallel(query, apiKey, maxResults);
+  const shouldFilterYale = yaleOnly || yaleSomOnly;
+  return searchWithExa(query, apiKey, maxResults, shouldFilterYale, yaleSomOnly);
 }
 
-async function searchWithExa(query: string, apiKey: string, maxResults: number): Promise<SuperSearchResult[]> {
+async function searchWithExa(
+  query: string,
+  apiKey: string,
+  maxResults: number,
+  yaleOnly: boolean,
+  yaleSomOnly: boolean
+): Promise<SuperSearchResult[]> {
+  const providerQuery = buildProviderQuery(query, yaleOnly, yaleSomOnly);
   const response = await fetch(EXA_SEARCH_ENDPOINT, {
     method: "POST",
     headers: {
@@ -47,7 +50,7 @@ async function searchWithExa(query: string, apiKey: string, maxResults: number):
       "x-api-key": apiKey
     },
     body: JSON.stringify({
-      query,
+      query: providerQuery,
       category: "linkedin profile",
       type: "neural",
       numResults: clampResultLimit(maxResults),
@@ -60,7 +63,7 @@ async function searchWithExa(query: string, apiKey: string, maxResults: number):
   });
 
   if (!response.ok) {
-    throw await buildProviderError("exa", response);
+    throw await buildProviderError(response);
   }
 
   const payload = (await response.json()) as {
@@ -68,7 +71,7 @@ async function searchWithExa(query: string, apiKey: string, maxResults: number):
   };
 
   const results = Array.isArray(payload.results) ? payload.results : [];
-  return results.flatMap((item) => {
+  const mappedResults = results.flatMap((item) => {
     const linkedinUrl = toString(item.url);
     if (!linkedinUrl || !isLinkedinProfileUrl(linkedinUrl)) return [];
 
@@ -131,83 +134,9 @@ async function searchWithExa(query: string, apiKey: string, maxResults: number):
       }
     ];
   });
-}
 
-async function searchWithParallel(query: string, apiKey: string, maxResults: number): Promise<SuperSearchResult[]> {
-  const response = await fetch(PARALLEL_SEARCH_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "parallel-beta": "search-v1"
-    },
-    body: JSON.stringify({
-      query,
-      max_results: clampResultLimit(maxResults),
-      include_domains: ["linkedin.com/in", "linkedin.com/pub"]
-    })
-  });
-
-  if (!response.ok) {
-    throw await buildProviderError("parallel", response);
-  }
-
-  const payload = (await response.json()) as Record<string, unknown>;
-  const maybeResults =
-    (Array.isArray(payload.results) && payload.results) ||
-    (Array.isArray(payload.data) && payload.data) ||
-    [];
-
-  return maybeResults.flatMap((raw) => {
-    const item = (raw ?? {}) as Record<string, unknown>;
-    const linkedinUrl = toString(item.url ?? item.link ?? item.source_url);
-    if (!linkedinUrl || !isLinkedinProfileUrl(linkedinUrl)) return [];
-
-    const rawName = toString(item.name ?? item.title) || extractLinkedinHandle(linkedinUrl);
-    const name = sanitizePersonName(rawName, linkedinUrl);
-    const title = toString(item.title ?? item.headline) || oneLineTitleFallback(name);
-    const oneLiner =
-      pickFirstString(item, ["one_liner", "oneLiner", "headline", "summary", "snippet"]) || "";
-    const description =
-      pickFirstString(item, ["description", "content", "summary", "snippet", "text"]) || "";
-    const location =
-      pickFirstString(item, [
-        "location",
-        "locationName",
-        "geo",
-        "author.location",
-        "profile.location",
-        "profile.geo",
-        "city",
-        "state",
-        "region",
-        "country",
-        "countryName"
-      ]) || "";
-    const interests = normalizeInterests(item.interests ?? item.tags ?? item.keywords);
-    const textSnippet = description || oneLiner || toString(item.snippet ?? item.summary ?? "");
-    const inferredLocation = inferLocationFromText([location, oneLiner, description, title, textSnippet]);
-    const summary = normalizeLongText(description || oneLiner || textSnippet);
-
-    return [
-      {
-        id: buildResultId("parallel", linkedinUrl, name),
-        name,
-        title,
-        gradYear: "SOM",
-        location: inferredLocation || "Unknown",
-        interests,
-        summary,
-        availability: "Availability not provided",
-        linkedinUrl,
-        snippet: trimSnippet(textSnippet),
-        description: normalizeLongText(description),
-        oneLiner: normalizeLongText(oneLiner),
-        publishedDate: toString(item.publishedDate) || undefined,
-        source: "parallel" as const
-      }
-    ];
-  });
+  if (yaleSomOnly) return mappedResults.filter(isLikelyYaleSomAlum);
+  return yaleOnly ? mappedResults.filter(isLikelyYaleAlum) : mappedResults;
 }
 
 function clampResultLimit(maxResults: number): number {
@@ -267,7 +196,7 @@ function normalizeInterests(value: unknown): string[] {
   return [];
 }
 
-function buildResultId(source: SuperSearchProvider, linkedinUrl: string, name: string): string {
+function buildResultId(source: "exa", linkedinUrl: string, name: string): string {
   return `${source}:${linkedinUrl || name}`;
 }
 
@@ -319,6 +248,56 @@ function sanitizePersonName(raw: string, linkedinUrl: string): string {
   return extractLinkedinHandle(linkedinUrl);
 }
 
+function buildProviderQuery(query: string, yaleOnly: boolean, yaleSomOnly: boolean): string {
+  if (yaleSomOnly) {
+    return `${query} "Yale School of Management" OR "Yale SOM" alumni`;
+  }
+  if (yaleOnly) {
+    return `${query} Yale University OR Yale School of Management alumni`;
+  }
+  return query;
+}
+
+function isLikelyYaleAlum(result: SuperSearchResult): boolean {
+  const combined = [
+    result.name,
+    result.title,
+    result.summary,
+    result.description,
+    result.oneLiner,
+    result.snippet
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    /\byale\b/.test(combined) ||
+    /\byale som\b/.test(combined) ||
+    /\byale school of management\b/.test(combined)
+  );
+}
+
+function isLikelyYaleSomAlum(result: SuperSearchResult): boolean {
+  const combined = [
+    result.name,
+    result.title,
+    result.summary,
+    result.description,
+    result.oneLiner,
+    result.snippet
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    /\byale som\b/.test(combined) ||
+    /\byale school of management\b/.test(combined) ||
+    /\bschool of management at yale\b/.test(combined)
+  );
+}
+
 function looksLikePersonName(value: string): boolean {
   if (!value) return false;
   const tokens = value
@@ -350,7 +329,7 @@ function looksLikePersonName(value: string): boolean {
   return true;
 }
 
-async function buildProviderError(provider: SuperSearchProvider, response: Response): Promise<Error> {
+async function buildProviderError(response: Response): Promise<Error> {
   let detail = "";
   try {
     const body = await response.text();
@@ -358,9 +337,8 @@ async function buildProviderError(provider: SuperSearchProvider, response: Respo
   } catch {
     detail = "";
   }
-  const prefix = provider === "exa" ? "Exa" : "Parallel.ai";
   const message = detail
-    ? `${prefix} request failed (${response.status}): ${detail}`
-    : `${prefix} request failed (${response.status}).`;
+    ? `Exa request failed (${response.status}): ${detail}`
+    : `Exa request failed (${response.status}).`;
   return new Error(message);
 }
