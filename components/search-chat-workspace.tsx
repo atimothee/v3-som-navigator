@@ -269,7 +269,6 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
           {superResults.length > 0 ? (
             <div className="super-results" aria-live="polite">
               {superResults.map((result) => {
-                const displayLocation = formatResultLocation(result.location);
                 return (
                 <Card key={result.id} className="profile-card" variant="surface">
                   <Flex align="center" gap="3" mb="3">
@@ -283,11 +282,6 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                       <Text as="p" size="2" color="gray">
                         {result.title}
                       </Text>
-                      {displayLocation ? (
-                        <Text as="p" size="2" color="gray">
-                          {displayLocation}
-                        </Text>
-                      ) : null}
                     </div>
                   </Flex>
 
@@ -391,12 +385,4 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
-}
-
-function formatResultLocation(location: string): string | null {
-  const normalizedLocation = location.trim();
-  if (!normalizedLocation || normalizedLocation.toLowerCase() === "unknown") {
-    return null;
-  }
-  return normalizedLocation;
 }
