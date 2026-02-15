@@ -76,7 +76,8 @@ async function searchWithExa(
 
     const rawName = pickFirstString(item, ["name", "title"]) || extractLinkedinHandle(linkedinUrl);
     const name = sanitizePersonName(rawName, linkedinUrl);
-    const title = pickFirstString(item, ["title", "headline"]) || oneLineTitleFallback(name);
+    const rawTitle = pickFirstString(item, ["title", "headline"]) || "";
+    const title = sanitizeTitle(rawTitle, name) || oneLineTitleFallback(name);
     const oneLiner =
       pickFirstString(item, [
         "contents.summary",
@@ -273,6 +274,54 @@ function sanitizePersonName(raw: string, linkedinUrl: string): string {
   }
 
   return extractLinkedinHandle(linkedinUrl);
+}
+
+function sanitizeTitle(raw: string, name: string): string {
+  const normalized = raw
+    .replace(/\s*\|\s*linkedin.*$/i, "")
+    .replace(/\s*-\s*linkedin.*$/i, "")
+    .trim();
+
+  if (!normalized) return "";
+  if (!name.trim()) return normalized;
+
+  const parts = normalized
+    .split(/\s[|–—-]\s/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length > 1 && startsWithName(parts[0], name)) {
+    const withoutNamePrefix = parts.slice(1).join(" | ").trim();
+    if (withoutNamePrefix) return withoutNamePrefix;
+  }
+
+  const escapedName = escapeRegExp(name.trim());
+  const exactPrefixPattern = new RegExp(`^${escapedName}\\s*(?:\\||[-–—])\\s*`, "i");
+  const withoutExactPrefix = normalized.replace(exactPrefixPattern, "").trim();
+  if (withoutExactPrefix && withoutExactPrefix !== normalized) {
+    return withoutExactPrefix;
+  }
+
+  return normalized;
+}
+
+function startsWithName(value: string, name: string): boolean {
+  const normalizedValue = normalizeComparableText(value);
+  const normalizedName = normalizeComparableText(name);
+  if (!normalizedValue || !normalizedName) return false;
+  return normalizedValue === normalizedName || normalizedValue.startsWith(`${normalizedName} `);
+}
+
+function normalizeComparableText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[()[\],.]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 function buildProviderQuery(query: string, yaleOnly: boolean, yaleSomOnly: boolean): string {
