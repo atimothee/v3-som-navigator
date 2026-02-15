@@ -54,7 +54,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
   async function runSuperSearch() {
     const normalizedQuery = superQuery.trim();
     if (!normalizedQuery) {
-      setSuperError("Enter a natural-language search query.");
+      setSuperError("Describe who you want to meet.");
       return;
     }
 
@@ -88,9 +88,9 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
           throw new Error(payload.error);
         }
         if (rawBody.trim().startsWith("<!DOCTYPE") || rawBody.trim().startsWith("<html")) {
-          throw new Error("Super search returned HTML instead of JSON. Your session may have expired; refresh and sign in again.");
+          throw new Error("People Finder returned HTML instead of JSON. Your session may have expired; refresh and sign in again.");
         }
-        throw new Error(rawBody.slice(0, 220) || "Super search failed.");
+        throw new Error(rawBody.slice(0, 220) || "People Finder failed.");
       }
 
       const results = Array.isArray(payload.results) ? payload.results : [];
@@ -99,7 +99,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
         setSuperError("No Yale SOM alumni profile matches returned for this query.");
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Super search failed.";
+      const message = error instanceof Error ? error.message : "People Finder failed.";
       setSuperError(message);
     } finally {
       setSuperSearching(false);
@@ -197,7 +197,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
           className={activeMode === "search" ? "workspace-mode-button active" : "workspace-mode-button"}
           onClick={() => switchMode("search")}
         >
-          Search
+          Find People
         </Button>
         <Button
           type="button"
@@ -207,14 +207,20 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
           className={activeMode === "chat" ? "workspace-mode-button active" : "workspace-mode-button"}
           onClick={() => switchMode("chat")}
         >
-          Chat
+          Chat Mode
         </Button>
       </Flex>
+
+      <Text as="p" size="2" color="gray" mb="2">
+        {activeMode === "search"
+          ? "Start by describing who you want to meet."
+          : "Use chat to refine and personalize your outreach."}
+      </Text>
 
       {activeMode === "search" ? (
       <section className="search-pane glass" aria-label="People search">
         <Flex justify="between" align="center" wrap="wrap" gap="3">
-          <Heading size="6">Super Search</Heading>
+          <Heading size="6">People Finder</Heading>
           <Flex direction="column" align="end" gap="1">
             <Text size="1" color={hasProfileDocumentText ? "green" : "gray"}>
               {hasProfileDocumentText ? (
@@ -232,20 +238,15 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
         </Flex>
 
         <div className="super-search-panel">
-          <Flex justify="between" align="center" wrap="wrap" gap="2" mb="2">
-            <Text as="p" size="4" weight="bold">
-              Super Search
-            </Text>
-            <Text size="1" color="gray">
-              Powered by web search
-            </Text>
-          </Flex>
+          <Text as="p" size="2" color="gray" mb="2">
+            Finds relevant SOM alumni from verified public profiles.
+          </Text>
 
           <label className="search-field">
-            <span>Natural-language people search</span>
+            <span>Who do you want to meet?</span>
             <input
               type="text"
-              placeholder="Example: Yale SOM alumni in climate fintech in NYC open to coffee chats"
+              placeholder="Example: SOM alumni in climate fintech in NYC open to a 15-minute coffee chat"
               value={superQuery}
               onChange={(event) => setSuperQuery(event.target.value)}
             />
@@ -253,10 +254,10 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
 
           <Flex gap="2" mt="3" wrap="wrap" align="center">
             <Button type="button" onClick={runSuperSearch} disabled={superSearching}>
-              {superSearching ? "Searching..." : "Run super search"}
+              {superSearching ? "Searching..." : "Find matches"}
             </Button>
             <Text size="1" color="gray">
-              Search is configured automatically.
+              Tip: Include industry, location, and role for better matches.
             </Text>
           </Flex>
 
@@ -323,7 +324,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                     ) : null}
 
                     <Button variant="soft" color="gray" onClick={() => runOpenerDraft(result)} disabled={openerByResultId[result.id]?.loading}>
-                      {openerByResultId[result.id]?.loading ? "Drafting..." : "Draft opener text"}
+                      {openerByResultId[result.id]?.loading ? "Drafting..." : "Generate outreach draft"}
                     </Button>
                   </Flex>
 
@@ -336,20 +337,23 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                   {openerByResultId[result.id]?.text ? (
                     <Card className="opener-result-card" variant="surface" mt="3">
                       <Text as="p" size="2" weight="bold">
-                        Standalone opener draft
+                        Outreach draft
                       </Text>
                       <Text as="p" size="2" mt="2">
                         {openerByResultId[result.id]?.text}
                       </Text>
+                      <Text as="p" size="1" color="gray" mt="2">
+                        Generate a first outreach draft using this person&apos;s profile.
+                      </Text>
                       <Flex gap="2" mt="3" wrap="wrap">
                         <Button size="1" variant="soft" onClick={() => copyOpener(result.id, openerByResultId[result.id].text ?? "")}>
-                          Copy
+                          Copy draft
                         </Button>
                         <Button size="1" variant="soft" color="gray" onClick={() => runOpenerDraft(result)} disabled={openerByResultId[result.id]?.loading}>
                           Regenerate
                         </Button>
                         <Button size="1" onClick={() => sendOpenerToChat(result.id, openerByResultId[result.id].text ?? "")}>
-                          Use in chat
+                          Draft outreach
                         </Button>
                       </Flex>
                     </Card>
