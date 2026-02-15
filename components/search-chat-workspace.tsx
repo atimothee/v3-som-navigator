@@ -282,7 +282,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                         {result.title}
                       </Text>
                       <Text as="p" size="2" color="gray">
-                        {result.location}
+                        {formatResultLocation(result.location)}
                       </Text>
                     </div>
                   </Flex>
@@ -386,4 +386,12 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase() ?? "")
     .join("");
+}
+
+function formatResultLocation(location: string): string {
+  const normalizedLocation = location.trim();
+  if (!normalizedLocation || normalizedLocation.toLowerCase() === "unknown") {
+    return "Location Unknown";
+  }
+  return normalizedLocation;
 }
