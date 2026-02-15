@@ -5,6 +5,25 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 import { trackEvent, trackPage } from "@/lib/analytics";
 
+function getElementLabel(element: HTMLElement) {
+  const explicitLabel = element.dataset.analyticsLabel;
+  if (explicitLabel) return explicitLabel;
+
+  const ariaLabel = element.getAttribute("aria-label");
+  if (ariaLabel) return ariaLabel;
+
+  const text = element.innerText?.trim();
+  if (text) return text.slice(0, 120);
+
+  const name = element.getAttribute("name");
+  if (name) return name;
+
+  const id = element.getAttribute("id");
+  if (id) return id;
+
+  return element.tagName.toLowerCase();
+}
+
 export function AnalyticsProvider() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -20,16 +39,14 @@ export function AnalyticsProvider() {
       const target = event.target as HTMLElement | null;
       if (!target) return;
 
-      const labeledElement = target.closest("[data-analytics-label]") as HTMLElement | null;
-      const text =
-        labeledElement?.innerText?.trim() ||
-        target.innerText?.trim() ||
-        labeledElement?.tagName?.toLowerCase() ||
-        target.tagName.toLowerCase();
+      const interactiveElement = target.closest(
+        "button, a, summary, [role='button'], [data-analytics-label]"
+      ) as HTMLElement | null;
+      if (!interactiveElement) return;
 
       trackEvent("UI Click", {
         path: pathname,
-        label: text?.slice(0, 120) || "unknown"
+        label: getElementLabel(interactiveElement)
       });
     };
 
