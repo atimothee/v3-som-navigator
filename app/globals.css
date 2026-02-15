@@ -31,8 +31,29 @@ body {
 .site-header {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 10px;
   padding: 12px 18px 4px;
+}
+
+.site-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.site-nav a {
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.site-nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .page-content {
@@ -390,6 +411,26 @@ a {
   margin-bottom: 14px;
 }
 
+.super-search-panel {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.super-search-controls {
+  display: grid;
+  grid-template-columns: 160px minmax(220px, 1fr) auto;
+  gap: 12px;
+  margin-bottom: 12px;
+  align-items: end;
+}
+
+.super-results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 12px;
+}
+
 .search-field {
   display: flex;
   flex-direction: column;
@@ -502,6 +543,11 @@ a {
   border: 1px dashed var(--stroke);
 }
 
+.profile-doc-form {
+  display: grid;
+  gap: 12px;
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(124, 248, 200, 0.45);
@@ -524,6 +570,10 @@ a {
 }
 
 @media (max-width: 640px) {
+  .site-nav {
+    display: none;
+  }
+
   .chat-spotlight {
     margin: 0;
     padding: 0;
@@ -560,6 +610,10 @@ a {
 
 @media (max-width: 780px) {
   .search-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .super-search-controls {
     grid-template-columns: 1fr;
   }
 }

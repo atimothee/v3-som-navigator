@@ -2,9 +2,11 @@
 
 import { ChatPanel } from "@/components/chat-panel";
 import { Button, Card, Flex, Heading, Text } from "@radix-ui/themes";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
-type SearchProfile = {
+type SuperSearchProvider = "exa" | "parallel";
+type SuperSearchResult = {
   id: string;
   name: string;
   title: string;
@@ -15,200 +17,281 @@ type SearchProfile = {
   availability: string;
   linkedinUrl?: string;
   publishedDate?: string;
+  snippet: string;
+  description: string;
+  oneLiner: string;
+  source: SuperSearchProvider;
 };
 
-type SortOption = "recent" | "name";
-
-export function SearchChatWorkspace({ profiles }: { profiles: SearchProfile[] }) {
-  const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("recent");
+export function SearchChatWorkspace({ hasProfileDocument }: { hasProfileDocument: boolean }) {
   const [chatSeed, setChatSeed] = useState<{ text: string; nonce: number } | null>(null);
   const [expandedDescriptions, setExpandedDescriptions] = useState<Record<string, boolean>>({});
+  const [superProvider, setSuperProvider] = useState<SuperSearchProvider>("exa");
+  const [superApiKey, setSuperApiKey] = useState("");
+  const [superQuery, setSuperQuery] = useState("");
+  const [superSearching, setSuperSearching] = useState(false);
+  const [superError, setSuperError] = useState<string | null>(null);
+  const [superResults, setSuperResults] = useState<SuperSearchResult[]>([]);
 
-  const locationOptions = useMemo(() => {
-    const options = new Set<string>();
-    for (const profile of profiles) {
-      if (profile.location) {
-        options.add(profile.location);
-      }
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const provider = window.localStorage.getItem("super-search-provider");
+    const exaKey = window.localStorage.getItem("super-search-exa-key");
+    const parallelKey = window.localStorage.getItem("super-search-parallel-key");
+
+    if (provider === "parallel" || provider === "exa") {
+      setSuperProvider(provider);
+      setSuperApiKey(provider === "parallel" ? parallelKey ?? "" : exaKey ?? "");
+      return;
     }
-    return Array.from(options).sort((a, b) => a.localeCompare(b));
-  }, [profiles]);
 
-  const filteredProfiles = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const normalizedLocation = location.trim().toLowerCase();
+    if (exaKey) {
+      setSuperApiKey(exaKey);
+    }
+  }, []);
 
-    const matched = profiles.filter((profile) => {
-      const haystack = [
-        profile.name,
-        profile.title,
-        profile.location,
-        profile.summary,
-        profile.availability,
-        profile.gradYear,
-        ...profile.interests
-      ]
-        .join(" ")
-        .toLowerCase();
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("super-search-provider", superProvider);
+    const savedKey =
+      superProvider === "parallel"
+        ? window.localStorage.getItem("super-search-parallel-key")
+        : window.localStorage.getItem("super-search-exa-key");
+    setSuperApiKey(savedKey ?? "");
+  }, [superProvider]);
 
-      const queryMatch = !normalizedQuery || haystack.includes(normalizedQuery);
-      const locationMatch = !normalizedLocation || profile.location.toLowerCase().includes(normalizedLocation);
+  async function runSuperSearch() {
+    const normalizedQuery = superQuery.trim();
+    if (!normalizedQuery) {
+      setSuperError("Enter a natural-language search query.");
+      return;
+    }
+    if (!superApiKey.trim()) {
+      setSuperError(`Add your ${superProvider === "exa" ? "Exa" : "Parallel.ai"} API key first.`);
+      return;
+    }
 
-      return queryMatch && locationMatch;
-    });
+    setSuperSearching(true);
+    setSuperError(null);
+    setSuperResults([]);
 
-    matched.sort((a, b) => {
-      if (sortBy === "name") {
-        return a.name.localeCompare(b.name);
+    try {
+      const response = await fetch("/api/super-search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          query: normalizedQuery,
+          provider: superProvider,
+          apiKey: superApiKey.trim(),
+          maxResults: 10
+        })
+      });
+
+      const rawBody = await response.text();
+      let payload: { results?: SuperSearchResult[]; error?: string } = {};
+      try {
+        payload = rawBody ? (JSON.parse(rawBody) as { results?: SuperSearchResult[]; error?: string }) : {};
+      } catch {
+        payload = {};
       }
 
-      const aTs = a.publishedDate ? Date.parse(a.publishedDate) : 0;
-      const bTs = b.publishedDate ? Date.parse(b.publishedDate) : 0;
-      return bTs - aTs;
-    });
+      if (!response.ok) {
+        if (payload.error) {
+          throw new Error(payload.error);
+        }
+        if (rawBody.trim().startsWith("<!DOCTYPE") || rawBody.trim().startsWith("<html")) {
+          throw new Error("Super search returned HTML instead of JSON. Your session may have expired; refresh and sign in again.");
+        }
+        throw new Error(rawBody.slice(0, 220) || "Super search failed.");
+      }
 
-    return matched;
-  }, [location, profiles, query, sortBy]);
+      const results = Array.isArray(payload.results) ? payload.results : [];
+      setSuperResults(results);
+      if (results.length === 0) {
+        setSuperError("No LinkedIn profile matches returned for this query.");
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Super search failed.";
+      setSuperError(message);
+    } finally {
+      setSuperSearching(false);
+    }
+  }
+
+  function saveSuperSearchKey() {
+    if (typeof window === "undefined") return;
+    const storageKey = superProvider === "exa" ? "super-search-exa-key" : "super-search-parallel-key";
+    window.localStorage.setItem(storageKey, superApiKey.trim());
+  }
 
   return (
     <div className="search-chat-shell">
       <section className="search-pane glass" aria-label="People search">
         <Flex justify="between" align="center" wrap="wrap" gap="3">
-          <Heading size="6">Search for people</Heading>
-          <Text size="2" color="gray">
-            {filteredProfiles.length} result{filteredProfiles.length === 1 ? "" : "s"}
-          </Text>
+          <Heading size="6">Super Search</Heading>
+          <Flex direction="column" align="end" gap="1">
+            <Text size="1" color={hasProfileDocument ? "green" : "gray"}>
+              {hasProfileDocument ? (
+                "Personalized opener mode is on"
+              ) : (
+                <>
+                  Upload resume/LinkedIn PDF for personalization.{" "}
+                  <Link href="/account/profile-document" style={{ textDecoration: "underline" }}>
+                    Add now
+                  </Link>
+                </>
+              )}
+            </Text>
+          </Flex>
         </Flex>
 
-        <div className="search-controls">
+        <div className="super-search-panel">
+          <Flex justify="between" align="center" wrap="wrap" gap="2" mb="2">
+            <Text as="p" size="4" weight="bold">
+              Super Search (Web LinkedIn)
+            </Text>
+            <Text size="1" color="gray">
+              Uses your own Exa or Parallel.ai key
+            </Text>
+          </Flex>
+
+          <div className="super-search-controls">
+            <label className="search-field">
+              <span>Provider</span>
+              <select value={superProvider} onChange={(event) => setSuperProvider(event.target.value as SuperSearchProvider)}>
+                <option value="exa">Exa</option>
+                <option value="parallel">Parallel.ai</option>
+              </select>
+            </label>
+
+            <label className="search-field">
+              <span>API key</span>
+              <input
+                type="password"
+                placeholder={superProvider === "exa" ? "Enter Exa API key" : "Enter Parallel.ai API key"}
+                value={superApiKey}
+                onChange={(event) => setSuperApiKey(event.target.value)}
+              />
+            </label>
+
+            <Button type="button" variant="soft" color="gray" onClick={saveSuperSearchKey}>
+              Save key
+            </Button>
+          </div>
+
           <label className="search-field">
-            <span>Name or keyword</span>
+            <span>Natural-language LinkedIn search</span>
             <input
               type="text"
-              placeholder="Type a name or keyword"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Example: Yale SOM alumni in climate fintech in NYC open to coffee chats"
+              value={superQuery}
+              onChange={(event) => setSuperQuery(event.target.value)}
             />
           </label>
 
-          <label className="search-field">
-            <span>Location</span>
-            <select value={location} onChange={(event) => setLocation(event.target.value)}>
-              <option value="">All locations</option>
-              {locationOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </label>
+          <Flex gap="2" mt="3" wrap="wrap" align="center">
+            <Button type="button" onClick={runSuperSearch} disabled={superSearching}>
+              {superSearching ? "Searching..." : "Run super search"}
+            </Button>
+            <Text size="1" color="gray">
+              Key is stored locally in your browser only.
+            </Text>
+          </Flex>
 
-          <label className="search-sort">
-            <span>Sort by</span>
-            <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)}>
-              <option value="recent">Recently active</option>
-              <option value="name">Name (A-Z)</option>
-            </select>
-          </label>
+          {superError ? (
+            <Text as="p" size="2" color="red" mt="2">
+              {superError}
+            </Text>
+          ) : null}
 
-          <Button
-            type="button"
-            variant="soft"
-            color="gray"
-            onClick={() => {
-              setQuery("");
-              setLocation("");
-              setSortBy("recent");
-            }}
-          >
-            Clear all filters
-          </Button>
-        </div>
+          {superResults.length > 0 ? (
+            <div className="super-results" aria-live="polite">
+              {superResults.map((result) => (
+                <Card key={result.id} className="profile-card" variant="surface">
+                  <Flex align="center" gap="3" mb="3">
+                    <div className="profile-avatar" aria-hidden>
+                      {getInitials(result.name)}
+                    </div>
+                    <div>
+                      <Text as="p" size="5" weight="bold">
+                        {result.name}
+                      </Text>
+                      <Text as="p" size="2" color="gray">
+                        {result.title}
+                      </Text>
+                      <Text as="p" size="2" color="gray">
+                        {result.location}
+                      </Text>
+                    </div>
+                  </Flex>
 
-        <div className="profile-grid" aria-live="polite">
-          {filteredProfiles.length === 0 ? (
-            <Card variant="surface" className="profile-empty">
-              <Text size="2" color="gray">
-                No matches found. Try another keyword, location, or reset filters.
-              </Text>
-            </Card>
-          ) : (
-            filteredProfiles.slice(0, 60).map((profile) => (
-              <Card key={profile.id} className="profile-card" variant="surface">
-                <Flex align="center" gap="3" mb="3">
-                  <div className="profile-avatar" aria-hidden>
-                    {getInitials(profile.name)}
-                  </div>
-                  <div>
-                    <Text as="p" size="5" weight="bold">
-                      {profile.name}
-                    </Text>
-                    <Text as="p" size="2" color="gray">
-                      {profile.title}
-                    </Text>
-                    <Text as="p" size="2" color="gray">
-                      {profile.location}
-                    </Text>
-                  </div>
-                </Flex>
-
-                <Text
-                  as="p"
-                  size="2"
-                  className={expandedDescriptions[profile.id] ? "profile-summary profile-summary-expanded" : "profile-summary"}
-                >
-                  {profile.summary}
-                </Text>
-
-                {profile.summary.length > 220 ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    color="gray"
-                    size="1"
-                    className="profile-description-toggle"
-                    onClick={() =>
-                      setExpandedDescriptions((prev) => ({
-                        ...prev,
-                        [profile.id]: !prev[profile.id]
-                      }))
-                    }
+                  <Text
+                    as="p"
+                    size="2"
+                    className={expandedDescriptions[result.id] ? "profile-summary profile-summary-expanded" : "profile-summary"}
                   >
-                    {expandedDescriptions[profile.id] ? "Show less" : "Read full description"}
-                  </Button>
-                ) : null}
+                    {result.summary}
+                  </Text>
 
-                <Text as="p" size="2" color="gray" mt="2">
-                  Availability: {profile.availability}
-                </Text>
-
-                <Flex gap="2" mt="4" wrap="wrap">
-                  {profile.linkedinUrl ? (
-                    <Button asChild>
-                      <a href={profile.linkedinUrl} target="_blank" rel="noreferrer">
-                        Go to profile
-                      </a>
+                  {result.summary.length > 220 ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      color="gray"
+                      size="1"
+                      className="profile-description-toggle"
+                      onClick={() =>
+                        setExpandedDescriptions((prev) => ({
+                          ...prev,
+                          [result.id]: !prev[result.id]
+                        }))
+                      }
+                    >
+                      {expandedDescriptions[result.id] ? "Show less" : "Read full description"}
                     </Button>
                   ) : null}
 
-                  <Button
-                    variant="soft"
-                    color="gray"
-                    onClick={() =>
-                      setChatSeed({
-                        text: `Help me draft a coffee chat outreach for ${profile.name}, ${profile.title} in ${profile.location}.`,
-                        nonce: Date.now()
-                      })
-                    }
-                  >
-                    Draft opener text
-                  </Button>
-                </Flex>
-              </Card>
-            ))
-          )}
+                  <Text as="p" size="1" color="gray" mt="1">
+                    via: {result.source === "exa" ? "Exa" : "Parallel.ai"}
+                  </Text>
+
+                  <Flex gap="2" mt="4" wrap="wrap">
+                    {result.linkedinUrl ? (
+                      <Button asChild>
+                        <a href={result.linkedinUrl} target="_blank" rel="noreferrer">
+                          Go to profile
+                        </a>
+                      </Button>
+                    ) : null}
+
+                    <Button
+                      variant="soft"
+                      color="gray"
+                      onClick={() =>
+                        setChatSeed({
+                          text:
+                            `Draft 2 short coffee-chat opener options for this person. Focus on likely common ground between my background and theirs if you have my uploaded resume/LinkedIn PDF.\n` +
+                            `Target person:\n` +
+                            `- Name: ${result.name}\n` +
+                            `- Title: ${result.title}\n` +
+                            `- Location: ${result.location}\n` +
+                            `- Interests: ${result.interests.join(", ") || "Not listed"}\n` +
+                            `- Summary: ${result.summary}\n` +
+                            `- LinkedIn: ${result.linkedinUrl ?? "Not provided"}`,
+                          nonce: Date.now()
+                        })
+                      }
+                    >
+                      Draft opener text
+                    </Button>
+                  </Flex>
+                </Card>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 

@@ -1,23 +1,13 @@
 import { SearchChatWorkspace } from "@/components/search-chat-workspace";
-import { loadProfilesFromDocs } from "@/lib/profiles";
+import { parseStoredProfileDocument } from "@/lib/profile-document";
 import { requireYaleUser } from "@/lib/require-yale-user";
+import { currentUser } from "@clerk/nextjs/server";
 import { Badge, Container, Flex, Heading, Text } from "@radix-ui/themes";
 
 export default async function ChatPage() {
   await requireYaleUser();
-
-  const profiles = loadProfilesFromDocs().map((profile, index) => ({
-    id: profile.id ?? profile.linkedinUrl ?? `${profile.name}-${profile.title}-${index}`,
-    name: profile.name,
-    title: profile.title,
-    gradYear: profile.gradYear,
-    location: profile.location,
-    interests: profile.interests,
-    summary: profile.summary,
-    availability: profile.availability,
-    linkedinUrl: profile.linkedinUrl,
-    publishedDate: profile.publishedDate
-  }));
+  const user = await currentUser();
+  const storedDoc = parseStoredProfileDocument(user?.privateMetadata);
 
   return (
     <div className="chat-page">
@@ -31,11 +21,11 @@ export default async function ChatPage() {
               Search and Talk to the SOM Navigator
             </Heading>
             <Text size="4" color="gray" align="center" style={{ maxWidth: "780px" }}>
-              Find relevant alumni with filters, then draft personalized outreach in chat.
+              Run natural-language LinkedIn Super Search, then draft personalized outreach in chat.
             </Text>
           </Flex>
 
-          <SearchChatWorkspace profiles={profiles} />
+          <SearchChatWorkspace hasProfileDocument={Boolean(storedDoc)} />
         </Flex>
       </Container>
     </div>
