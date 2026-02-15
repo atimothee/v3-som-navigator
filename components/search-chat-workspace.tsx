@@ -14,7 +14,6 @@ type SuperSearchResult = {
   location: string;
   interests: string[];
   summary: string;
-  availability: string;
   linkedinUrl?: string;
   publishedDate?: string;
   snippet: string;
@@ -207,14 +206,14 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
           className={activeMode === "chat" ? "workspace-mode-button active" : "workspace-mode-button"}
           onClick={() => switchMode("chat")}
         >
-          Chat Mode
+          Draft Message
         </Button>
       </Flex>
 
       <Text as="p" size="2" color="gray" mb="2">
         {activeMode === "search"
           ? "Start by describing who you want to meet."
-          : "Use chat to refine and personalize your outreach."}
+          : "Refine and personalize your outreach draft before sending."}
       </Text>
 
       {activeMode === "search" ? (
@@ -224,10 +223,10 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
           <Flex direction="column" align="end" gap="1">
             <Text size="1" color={hasProfileDocumentText ? "green" : "gray"}>
               {hasProfileDocumentText ? (
-                "Personalized opener mode is on"
+                "Personalization is on"
               ) : (
                 <>
-                  Upload your resume or profile PDF with extractable text for personalization.{" "}
+                  Upload your resume or LinkedIn PDF to improve opener personalization.{" "}
                   <Link href="/account/profile-document" style={{ textDecoration: "underline" }}>
                     Add now
                   </Link>
@@ -246,7 +245,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
             <span>Who do you want to meet?</span>
             <input
               type="text"
-              placeholder="Example: SOM alumni in climate fintech in NYC open to a 15-minute coffee chat"
+              placeholder="Examples: SOM alumni in climate tech in NYC; private equity in SF; AI product leadership in Seattle; consulting to operating roles"
               value={superQuery}
               onChange={(event) => setSuperQuery(event.target.value)}
             />
@@ -324,7 +323,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                     ) : null}
 
                     <Button variant="soft" color="gray" onClick={() => runOpenerDraft(result)} disabled={openerByResultId[result.id]?.loading}>
-                      {openerByResultId[result.id]?.loading ? "Drafting..." : "Generate outreach draft"}
+                      {openerByResultId[result.id]?.loading ? "Drafting..." : "Draft personalized opener"}
                     </Button>
                   </Flex>
 
@@ -353,7 +352,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
                           Regenerate
                         </Button>
                         <Button size="1" onClick={() => sendOpenerToChat(result.id, openerByResultId[result.id].text ?? "")}>
-                          Draft outreach
+                          Refine in Draft Message
                         </Button>
                       </Flex>
                     </Card>
@@ -370,7 +369,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
       <section className="chat-pane">
         <ChatPanel
           className="chat-panel-wide"
-          placeholder="Who can help me explore climate finance roles in NYC?"
+          placeholder="Refine this opener to sound warm, concise, and specific."
           prefillText={chatPrefill?.text}
           prefillNonce={chatPrefill?.nonce}
         />

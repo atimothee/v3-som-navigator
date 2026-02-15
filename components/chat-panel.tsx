@@ -17,9 +17,9 @@ type Props = {
 };
 
 const prompts = [
-  "Who can help me with a climate finance internship in NYC?",
-  "I'm exploring product management in New York City-who should I meet?",
-  "Looking for alum advice on launching a B2B SaaS pilot."
+  "Tighten this opener to sound warm, concise, and specific to their background.",
+  "Give me 3 variants: confident, friendly, and low-pressure.",
+  "Rewrite this note with a clearer outreach ask."
 ];
 
 export function ChatPanel({
@@ -137,9 +137,9 @@ export function ChatPanel({
     <Card className={clsx("glass", "chat-shell", expanded && "chat-shell-expanded", className)} size="4">
       <Flex justify="between" align="center" mb="4">
         <div>
-          <Text weight="bold">Chat Mode</Text>
+          <Text weight="bold">Draft Message</Text>
           <Text as="p" size="2" color="gray">
-            Refine outreach, ask for follow-ups, and tailor tone.
+            Refine outreach, tune tone, and generate stronger follow-ups.
           </Text>
         </div>
         {isLoading ? <div className="pulse" aria-label="model typing" /> : null}
@@ -149,7 +149,7 @@ export function ChatPanel({
         {messages.length === 0 ? (
           <Card variant="surface" className="message assistant" mb="3">
             <Text size="2" color="gray">
-              Pick a match and we&apos;ll help you write a concise, personalized outreach note.
+              Pick a match, generate a first draft, then use this space to refine it before you send.
             </Text>
           </Card>
         ) : (
@@ -217,7 +217,7 @@ export function ChatPanel({
       {isLoading && isDesktop ? (
         <div className="floating-pill loading-pill" role="status" aria-live="polite">
           <span className="spinner" aria-hidden />
-          <Text size="1">Assistant responding...</Text>
+          <Text size="1">Draft assistant responding...</Text>
         </div>
       ) : null}
 
@@ -248,7 +248,7 @@ function MessageBubble({ message }: { message: Message }) {
       aria-label={`${message.role} message`}
     >
       <Text weight="bold" size="2" color="gray">
-        {isUser ? "You" : "Navigator"}
+        {isUser ? "You" : "Draft Assistant"}
       </Text>
       <div className="message-content">
         <MarkdownContent content={message.content} />
