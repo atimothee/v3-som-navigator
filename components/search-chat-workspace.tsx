@@ -141,7 +141,7 @@ export function SearchChatWorkspace({ hasProfileDocumentText }: { hasProfileDocu
               {superSearching ? "Searching..." : "Run super search"}
             </Button>
             <Text size="1" color="gray">
-              No user API key entry required.
+              Search is configured automatically.
             </Text>
           </Flex>
 
