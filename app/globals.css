@@ -369,6 +369,12 @@ a {
   padding-bottom: 32px;
 }
 
+.workspace-content {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
 .chat-panel-wrap {
   width: 100%;
   max-width: 920px;

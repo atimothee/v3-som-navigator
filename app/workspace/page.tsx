@@ -12,7 +12,7 @@ export default async function WorkspacePage() {
   return (
     <div className="chat-page">
       <Container size="4" px={{ initial: "3", md: "6" }} py="7">
-        <Flex direction="column" gap="6">
+        <Flex direction="column" gap="6" className="workspace-content">
           <Flex direction="column" align="center" gap="3" className="chat-top">
             <Badge variant="surface" color="indigo">
               Beta
