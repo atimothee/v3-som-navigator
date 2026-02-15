@@ -15,13 +15,16 @@ export default async function ChatPage() {
         <Flex direction="column" gap="6">
           <Flex direction="column" align="center" gap="3" className="chat-top">
             <Badge variant="surface" color="indigo">
-              Beta Version
+              Beta
             </Badge>
             <Heading size="8" align="center" className="chat-title">
-              Search and Talk to the SOM Navigator
+              Find the right SOM alumni. Draft outreach that gets replies.
             </Heading>
             <Text size="4" color="gray" align="center" style={{ maxWidth: "780px" }}>
-              Run natural-language Super Search, then draft personalized outreach in chat.
+              Describe who you want to meet, review matches, then personalize your message in chat.
+            </Text>
+            <Text size="2" color="gray" align="center">
+              Built for Yale SOM networking.
             </Text>
           </Flex>
 
