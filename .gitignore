@@ -14,3 +14,7 @@ pnpm-debug.log*
 
 # local/private dataset files
 data/docs/
+
+# keep only root README markdown in git
+*.md
+!README.md
