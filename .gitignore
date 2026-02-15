@@ -11,3 +11,6 @@ pnpm-debug.log*
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# local/private dataset files
+data/docs/
