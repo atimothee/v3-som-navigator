@@ -1,5 +1,5 @@
-import { requireYaleUser } from "@/lib/require-yale-user";
 import { Badge, Box, Button, Card, Container, Flex, Grid, Heading, Inset, Separator, Text } from "@radix-ui/themes";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import Link from "next/link";
 
 const stats = [
@@ -17,7 +17,6 @@ const stats = [
 ];
 
 export default async function Page() {
-  await requireYaleUser();
   return (
     <div className="home-page">
       <Container size="4" px="6" py="7">
@@ -35,9 +34,16 @@ export default async function Page() {
               </Text>
 
               <Flex gap="3" mt="4" wrap="wrap">
-                <Button size="3" className="home-cta" asChild>
-                  <Link href="/chat">Try the chatbot</Link>
-                </Button>
+                <SignedIn>
+                  <Button size="3" className="home-cta" asChild>
+                    <Link href="/chat">Try the chatbot</Link>
+                  </Button>
+                </SignedIn>
+                <SignedOut>
+                  <Button size="3" className="home-cta" asChild>
+                    <Link href="/sign-in?redirect_url=%2Fchat">Try the chatbot</Link>
+                  </Button>
+                </SignedOut>
               </Flex>
             </Box>
           </Box>
