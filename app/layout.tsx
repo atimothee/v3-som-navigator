@@ -68,13 +68,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </header>
               <div className="page-content">{children}</div>
               <footer className="site-footer">
-                <span>
+                <p className="footer-credit">
                   Built by{" "}
                   <Link
                     href="https://www.linkedin.com/in/timothyasiimwe/"
                     target="_blank"
                     rel="noreferrer"
-                    style={{ textDecoration: "underline" }}
+                    
                   >
                     Timo
                   </Link>
@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     href="https://www.linkedin.com/in/psgca/"
                     target="_blank"
                     rel="noreferrer"
-                    style={{ textDecoration: "underline" }}
+                    
                   >
                     Parm
                   </Link>{" "}
@@ -92,11 +92,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                     href="https://www.linkedin.com/in/aniket-agg/"
                     target="_blank"
                     rel="noreferrer"
-                    style={{ textDecoration: "underline" }}
+                    
                   >
                     Aniket
                   </Link>
-                </span>
+                </p>
+                <p className="footer-feedback">
+                  Found issue?{" "}
+                  <Link
+                    href="https://forms.gle/pjzU8X8eKQ4YMRrq9"
+                    target="_blank"
+                    rel="noreferrer"
+                    
+                  >
+                    Give us feedback
+                  </Link>
+                  .
+                </p>
               </footer>
             </div>
           </Theme>

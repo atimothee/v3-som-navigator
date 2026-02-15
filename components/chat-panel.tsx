@@ -212,13 +212,6 @@ export function ChatPanel({
         <Text as="p" size="1" color="gray" mt="2">
           Tip: Add your goal, shared interests, and preferred ask. Context resets each new question.
         </Text>
-        <Text as="p" size="1" color="gray" mt="2">
-          Found issue?{" "}
-          <a href="https://forms.gle/pjzU8X8eKQ4YMRrq9" target="_blank" rel="noreferrer" style={{ textDecoration: "underline" }}>
-            Give us feedback
-          </a>
-          .
-        </Text>
       </form>
 
       {isLoading && isDesktop ? (

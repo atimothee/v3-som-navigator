@@ -143,10 +143,7 @@ export async function POST(req: NextRequest) {
   try {
     retrieval = await retrieveProfiles(userQuestion);
   } catch (err) {
-    console.error("Failed to retrieve profiles via Pinecone:", err);
-    if (!openerMode) {
-      return new Response("Pinecone retrieval unavailable. Check Pinecone configuration and index readiness.", { status: 500 });
-    }
+    console.error("Failed to retrieve profiles via Pinecone/Exa:", err);
   }
 
   const matches = retrieval?.results ?? [];

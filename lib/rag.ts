@@ -2,14 +2,17 @@ import { createHash } from "node:crypto";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Profile } from "./profiles";
+import { superSearchLinkedinProfiles } from "./super-search";
 
 const PINECONE_INDEX = process.env.PINECONE_INDEX;
 const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
+const EXA_API_KEY = process.env.EXA_API_KEY?.trim() || "";
 const EMBEDDING_MODEL = "text-embedding-3-large";
 const EMBEDDING_DIMENSION = 3072;
 const MIN_CONTEXT_PROFILES = 10;
 const DEFAULT_TOP_K = 20;
 const TOP_K_BUFFER = 5;
+const EXA_MAX_RESULTS = 12;
 
 type RetrievalSource = "pinecone" | "exa";
 
@@ -45,47 +48,51 @@ const FALLBACK_DEFAULTS = {
 };
 
 export async function retrieveProfiles(query: string, k = MIN_CONTEXT_PROFILES): Promise<RetrievalResult> {
-  const index = getPineconeIndex();
-
-  if (!index) {
-    throw new Error("Pinecone not configured; set PINECONE_API_KEY and PINECONE_INDEX.");
-  }
-
-  const ready = await ensurePineconeIndex(index);
-  if (!ready) {
-    throw new Error("Pinecone index not ready or dimension mismatch.");
-  }
-
-  const vector = await embedText(query);
   let pineconeMatches: ProfileMatch[] = [];
   const topK = Math.max(k, DEFAULT_TOP_K, MIN_CONTEXT_PROFILES + TOP_K_BUFFER);
-  try {
-    const results = await index.query({
-      topK,
-      vector,
-      includeMetadata: true
-    });
-    console.log("Pinecone ids:", results.matches?.map((match) => match.id));
+  let pineconeReason: string | undefined;
+  const index = getPineconeIndex();
+  if (!index) {
+    pineconeReason = "pinecone_unavailable";
+    console.warn("Pinecone not configured; using Exa fallback.");
+  } else {
+    const ready = await ensurePineconeIndex(index);
+    if (!ready) {
+      pineconeReason = "pinecone_not_ready";
+      console.warn("Pinecone index not ready; using Exa fallback.");
+    } else {
+      try {
+        const vector = await embedText(query);
+        const results = await index.query({
+          topK,
+          vector,
+          includeMetadata: true
+        });
+        console.log("Pinecone ids:", results.matches?.map((match) => match.id));
 
-    if (results.matches?.length) {
-      pineconeMatches = results.matches.map((match) => {
-        const profile = sanitizeProfile(match.metadata ?? {});
-        return {
-          profile,
-          score: match.score ?? 0,
-          snippet: buildSnippet(profile),
-          source: "pinecone" as const
-        };
-      });
+        if (results.matches?.length) {
+          pineconeMatches = results.matches.map((match) => {
+            const profile = sanitizeProfile(match.metadata ?? {});
+            return {
+              profile,
+              score: match.score ?? 0,
+              snippet: buildSnippet(profile),
+              source: "pinecone" as const
+            };
+          });
+        }
+      } catch (err) {
+        pineconeReason = "pinecone_query_failed";
+        console.error("Pinecone query failed, using Exa fallback.", err);
+      }
     }
-  } catch (err) {
-    console.error("Pinecone query failed.", err);
-    throw new Error("Pinecone query failed.");
   }
 
   const uniqueMatches = dedupeMatches(pineconeMatches);
-  const limitedMatches = uniqueMatches.slice(0, Math.max(MIN_CONTEXT_PROFILES, topK));
-  const fallbackReason = evaluateFallback(limitedMatches);
+  const limit = Math.max(MIN_CONTEXT_PROFILES, topK);
+  const limitedMatches = uniqueMatches.slice(0, limit);
+  const retrievalQualityReason = evaluateFallback(limitedMatches);
+  const fallbackReason = pineconeReason ?? retrievalQualityReason;
   let fallbackUsed = false;
   let blobUrl: string | undefined;
   let combinedResults = limitedMatches;
@@ -97,15 +104,17 @@ export async function retrieveProfiles(query: string, k = MIN_CONTEXT_PROFILES):
   }
 
   if (fallbackReason) {
-    fallbackUsed = true;
-    console.log(`this is where exa ai will be called: ${query}`);
+    const exaResults = await retrieveFromExa(query, Math.min(EXA_MAX_RESULTS, limit));
+    fallbackUsed = exaResults.length > 0;
+    combinedResults = dedupeMatches([...combinedResults, ...exaResults]).slice(0, limit);
 
-    const exaResults: ProfileMatch[] = [];
-    combinedResults = dedupeMatches([...combinedResults, ...exaResults]);
-
-    const blobKey = buildBlobKey(query);
-    blobUrl = blobKey;
-    void persistExaResultsPlaceholder(exaResults, query, blobKey);
+    if (exaResults.length > 0) {
+      const blobKey = buildBlobKey(query);
+      blobUrl = blobKey;
+      void persistExaResultsPlaceholder(exaResults, query, blobKey);
+    } else {
+      console.warn(`Exa fallback returned no usable results for query: "${query}"`);
+    }
   }
 
   return {
@@ -212,6 +221,42 @@ function dedupeMatches(matches: ProfileMatch[]) {
 function buildBlobKey(query: string) {
   const hash = createHash("sha256").update(query).digest("hex").slice(0, 8);
   return `exa-search/${Date.now()}-${hash}.json`;
+}
+
+async function retrieveFromExa(query: string, maxResults: number): Promise<ProfileMatch[]> {
+  if (!EXA_API_KEY) {
+    console.warn("EXA_API_KEY missing; Exa fallback disabled.");
+    return [];
+  }
+
+  try {
+    const results = await superSearchLinkedinProfiles({
+      query,
+      apiKey: EXA_API_KEY,
+      maxResults,
+      yaleOnly: true,
+      yaleSomOnly: true
+    });
+
+    return results.map((result) => {
+      const profile: PublicProfile = {
+        name: result.name,
+        title: result.title,
+        summary: result.summary || result.description || result.snippet,
+        linkedinUrl: result.linkedinUrl
+      };
+
+      return {
+        profile,
+        score: 0,
+        snippet: result.snippet || buildSnippet(profile),
+        source: "exa" as const
+      };
+    });
+  } catch (error) {
+    console.error("Exa fallback failed.", error);
+    return [];
+  }
 }
 
 async function persistExaResultsPlaceholder(

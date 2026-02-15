@@ -208,17 +208,46 @@ function inferLocationFromText(parts: string[]): string {
   const joined = parts.filter(Boolean).join(" | ");
   if (!joined) return "";
 
+  const blockedTokens = new Set([
+    "english",
+    "urdu",
+    "arabic",
+    "spanish",
+    "french",
+    "german",
+    "hindi",
+    "mandarin",
+    "cantonese",
+    "portuguese",
+    "japanese",
+    "korean",
+    "russian"
+  ]);
+
+  const maybeLocation = (value: string | undefined) => {
+    const normalized = (value ?? "").trim().replace(/[.,;:]+$/, "");
+    if (!normalized || normalized.length > 45) return "";
+
+    const tokens = normalized.toLowerCase().split(/\s+/).filter(Boolean);
+    if (!tokens.length) return "";
+    if (tokens.some((token) => blockedTokens.has(token))) return "";
+    if (/^[A-Z][a-z]+,\s[A-Z][a-z]+$/.test(normalized)) return "";
+
+    return normalized;
+  };
+
   const patterns = [
+    /\b(Greater\s+[A-Z][a-z]+(?:\s[A-Z][a-z]+){0,2}\sArea)\b/,
     /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)*,\s[A-Z]{2})\b/,
     /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)*\sMetropolitan Area)\b/,
     /\b([A-Z][a-z]+(?:\s[A-Z][a-z]+)*,\s[A-Z][a-z]+)\b/,
-    /\b(?:based in|located in|in)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+){0,3})\b/i
+    /\b(?:based in|located in)\s+([A-Z][a-z]+(?:\s[A-Z][a-z]+){0,3})\b/i
   ];
 
   for (const pattern of patterns) {
     const match = joined.match(pattern);
-    const value = match?.[1]?.trim();
-    if (value && value.length <= 45) {
+    const value = maybeLocation(match?.[1]);
+    if (value) {
       return value;
     }
   }
