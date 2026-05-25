@@ -6,6 +6,11 @@
   "outputDirectory": ".next",
   "redirects": [
     {
+      "source": "/",
+      "destination": "https://som-alumni-search.vercel.app",
+      "permanent": true
+    },
+    {
       "source": "/:path*",
       "destination": "https://som-alumni-search.vercel.app/:path*",
       "permanent": true
